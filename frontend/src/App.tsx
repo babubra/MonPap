@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { isAuthenticated, setOnUnauthorized, settings as settingsApi } from './api';
+import { isAuthenticated, setOnUnauthorized, settings as settingsApi, setToken } from './api';
 import { Layout } from './components/Layout';
 import './lib/syncManager';
 import { Login } from './pages/Login';
@@ -12,6 +12,15 @@ import { References } from './pages/References';
 import { Settings } from './pages/Settings';
 
 function App() {
+  // Проверяем ?access_token= из Magic Link редиректа
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('access_token');
+  if (tokenFromUrl) {
+    setToken(tokenFromUrl);
+    // Очищаем URL от токена
+    window.history.replaceState({}, '', '/');
+  }
+
   const [authed, setAuthed] = useState(isAuthenticated());
   const [themeReady, setThemeReady] = useState(false);
 

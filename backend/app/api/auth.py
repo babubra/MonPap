@@ -75,7 +75,7 @@ async def verify_magic_link(
     token: str = Query(...),
     db: AsyncSession = Depends(get_db),
 ):
-    """Верификация Magic Link → выдача access token."""
+    """Верификация Magic Link → редирект на фронтенд с access token."""
     payload = verify_token(token)
     if not payload or payload.get("purpose") != "magic_link":
         raise HTTPException(
@@ -104,7 +104,9 @@ async def verify_magic_link(
     # Выдаём долгоживущий access token
     access_token = create_access_token({"sub": email})
 
-    return TokenResponse(access_token=access_token)
+    # Редирект на фронтенд с токеном
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url=f"/?access_token={access_token}")
 
 
 @router.get("/me", response_model=UserResponse)
