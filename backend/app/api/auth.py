@@ -1,6 +1,6 @@
 """Auth API — Magic Link аутентификация."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +19,7 @@ settings = get_settings()
 @router.post("/request-link", status_code=status.HTTP_200_OK)
 async def request_magic_link(
     body: AuthRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Запрос Magic Link на email.
@@ -52,7 +53,13 @@ async def request_magic_link(
 
     # Создаём Magic Link и отправляем
     token = create_magic_token(email)
-    sent = await send_magic_link(email, token)
+
+    # Определяем base_url из заголовков запроса
+    scheme = request.headers.get("x-forwarded-proto", "https")
+    host = request.headers.get("host", "")
+    base_url = f"{scheme}://{host}"
+
+    sent = await send_magic_link(email, token, base_url)
 
     if not sent:
         raise HTTPException(
