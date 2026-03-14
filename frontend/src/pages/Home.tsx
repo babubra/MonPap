@@ -210,7 +210,7 @@ export function Home() {
         amount: data.amount,
         transaction_date: data.date,
         category_id: categoryId || undefined,
-        comment: data.comment || undefined,
+        comment: data.raw_text || data.comment || undefined,
         raw_text: data.raw_text || undefined,
         currency: data.currency,
       });
@@ -220,7 +220,7 @@ export function Home() {
         amount: data.amount,
         debt_date: data.date,
         counterpart_id: counterpartId || undefined,
-        comment: data.comment || undefined,
+        comment: data.raw_text || data.comment || undefined,
         currency: data.currency,
       });
     } else if (data.type === 'debt_payment') {
@@ -228,7 +228,7 @@ export function Home() {
       await debtsApi.addPayment(data.debt_id, {
         amount: data.amount,
         payment_date: data.date,
-        comment: data.comment || undefined,
+        comment: data.raw_text || data.comment || undefined,
       });
     }
 
