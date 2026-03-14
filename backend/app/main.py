@@ -32,8 +32,10 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vite dev
-        "http://localhost",       # Nginx prod
+        "http://localhost:5173",          # Vite dev
+        "http://localhost",               # Nginx local
+        "https://monpap.mooo.com:10443",  # Production
+        "https://monpap.mooo.com",        # Production (без порта)
     ],
     allow_credentials=True,
     allow_methods=["*"],

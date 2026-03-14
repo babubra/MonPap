@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Скрипт первоначальной генерации SSL-сертификатов для Nginx.
-# Убедитесь, что вы уже заполнили домен в nginx/nginx.prod.conf (поиском и заменой example.com)
-# И запустили сервер (A-запись домена должна смотреть на IP сервера).
+# Скрипт первоначальной генерации SSL-сертификатов для MonPap.
+# Домен: monpap.mooo.com
+# Порт HTTPS: 10443
 
-domains=(example.com)
+domains=(monpap.mooo.com)
 rsa_key_size=4096
 data_path="./certbot"
-email="your-email@example.com" # Укажите свой актуальный email
+email="aiplegal60@gmail.com"
 staging=0 # Задайте 1 если вы просто тестируете генерацию, чтобы не поймать лимит Let's Encrypt
 
 if [ -d "$data_path" ]; then
@@ -68,3 +68,5 @@ echo
 
 echo ">>> Перезапуск Nginx с новым сертификатом..."
 docker compose -f docker-compose.prod.yml exec frontend nginx -s reload
+
+echo "✅ SSL-сертификат установлен! Приложение доступно по https://monpap.mooo.com:10443"
