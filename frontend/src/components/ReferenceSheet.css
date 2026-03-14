@@ -1,0 +1,130 @@
+/* ReferenceSheet.css */
+
+.ref-sheet-content {
+  padding: 16px 16px 32px;
+  max-height: 65dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  margin: 0 auto 16px;
+}
+
+.ref-sheet-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.ref-sheet-search {
+  margin-bottom: 12px;
+}
+
+.ref-sheet-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ref-sheet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  width: 100%;
+  text-align: left;
+}
+
+.ref-sheet-item:hover {
+  background: var(--bg-input-focus);
+}
+
+.ref-sheet-item--selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.ref-sheet-item-name {
+  font-weight: 500;
+}
+
+.ref-sheet-item-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.ref-sheet-item-check {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.ref-sheet-empty {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* Форма создания нового элемента */
+.ref-sheet-create-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--border);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--accent);
+  width: 100%;
+  text-align: left;
+}
+
+.ref-sheet-create-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.ref-sheet-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+}
+
+.ref-sheet-create-form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ref-sheet-create-form-row .input {
+  flex: 1;
+}
+
+.ref-sheet-create-form-row .btn {
+  flex-shrink: 0;
+}

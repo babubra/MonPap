@@ -1,0 +1,134 @@
+/* Login.css */
+
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 32px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Лого */
+.login-logo {
+  margin-bottom: 32px;
+}
+
+.login-logo-img {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 16px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.25));
+  animation: logo-float 3s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.login-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: 4px;
+}
+
+/* Форма */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-input-group {
+  position: relative;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.login-input {
+  padding-left: 44px;
+}
+
+.login-error {
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+/* Письмо отправлено */
+.login-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-sent-icon {
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.login-sent h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+.login-sent p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+/* Фон */
+.login-bg-glow {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--accent-subtle) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Спиннер */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

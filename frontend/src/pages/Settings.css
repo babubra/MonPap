@@ -1,0 +1,337 @@
+/* Settings.css */
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.settings-item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-logout {
+  color: var(--danger);
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.theme-toggle-track {
+  width: 48px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background var(--transition-base);
+}
+
+.theme-toggle-track--light {
+  background: var(--warning);
+}
+
+.theme-toggle-thumb {
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-track--light .theme-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* ── Секции настроек ───────────────────────────── */
+.settings-section {
+  margin-top: 24px;
+}
+
+.settings-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+/* ── Кастомный промт ───────────────────────────── */
+.settings-prompt-area {
+  min-height: 80px;
+}
+
+.settings-prompt-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 6px;
+}
+
+.settings-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ── Справочник ────────────────────────────────── */
+.ref-mgmt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ref-mgmt-item {
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.ref-mgmt-item--expanded {
+  border-color: var(--border-focus);
+}
+
+/* Верхняя строка карточки */
+.ref-mgmt-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ref-mgmt-item-top:hover {
+  background: var(--bg-card-hover);
+}
+
+.ref-mgmt-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ref-mgmt-item-name {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+.ref-mgmt-item-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.ref-mgmt-item-type {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  margin-right: 8px;
+}
+
+.ref-mgmt-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── AI-индикатор ─────────────────────── */
+.ref-mgmt-ai-indicator {
+  color: var(--accent);
+  margin-left: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ── Развёрнутая секция AI-подсказки ───────── */
+.ref-mgmt-hint-section {
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--accent-subtle);
+  overflow: hidden;
+}
+
+.ref-mgmt-hint-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.ref-mgmt-hint-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ref-mgmt-hint-input {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: var(--font-size-sm);
+}
+
+.ref-mgmt-hint-save {
+  flex-shrink: 0;
+  padding: 7px 12px;
+}
+
+.ref-mgmt-hint-help {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.ref-mgmt-item-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.ref-mgmt-item-btn:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-primary);
+}
+
+.ref-mgmt-item-btn.danger:hover {
+  color: var(--danger);
+  background: var(--danger-subtle);
+}
+
+/* Форма создания */
+.ref-mgmt-add-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ref-mgmt-add-form .input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+}
+
+/* ── Ручная форма транзакции ──────────────────── */
+.manual-tx-content {
+  padding: 16px 16px 32px;
+}
+
+.manual-tx-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  margin: 0 auto 16px;
+}
+
+.manual-tx-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.manual-tx-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.manual-tx-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.manual-tx-type-row {
+  display: flex;
+  gap: 4px;
+}
+
+.manual-tx-type-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.manual-tx-type-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.manual-tx-cat-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  width: 100%;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.manual-tx-cat-picker:hover {
+  border-color: var(--border-focus);
+}
+
+.manual-tx-cat-picker .text-muted {
+  color: var(--text-tertiary);
+}

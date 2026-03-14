@@ -1,0 +1,39 @@
+/* OfflineIndicator.css */
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  z-index: 200;
+}
+
+.offline-banner--online {
+  background: var(--success);
+  color: white;
+}
+
+.offline-banner--syncing {
+  background: var(--accent);
+  color: white;
+}
+
+.offline-banner--offline {
+  background: var(--warning);
+  color: #1a1a2e;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1.5s linear infinite;
+}

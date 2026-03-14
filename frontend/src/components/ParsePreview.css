@@ -1,0 +1,226 @@
+/* ParsePreview.css */
+
+/* ── Контейнер + overlay ──────────────────────────── */
+.parse-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 150;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn var(--transition-fast) ease-out;
+}
+
+.parse-card {
+  width: 100%;
+  max-width: var(--content-max-width);
+  background: var(--bg-secondary);
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+  padding: 20px 16px 32px;
+  animation: slideUp var(--transition-base) ease-out;
+  max-height: 85dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.parse-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  margin: 0 auto 16px;
+}
+
+.parse-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ── Сообщения об ошибках ───────────────────────── */
+.parse-error {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--danger-subtle);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parse-warning {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--warning-subtle);
+  color: var(--warning);
+  font-size: var(--font-size-sm);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ── Поля формы ─────────────────────────────────── */
+.parse-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.parse-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  gap: 12px;
+  min-height: 48px;
+}
+
+.parse-field-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.parse-field-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.parse-field-value {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.parse-field-value.text-muted {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.parse-field-edit {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parse-field-edit:hover {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* Инлайн-редактирование */
+.parse-field-inline-input {
+  width: 100%;
+  padding: 4px 8px;
+  background: var(--bg-input-focus);
+  border: 1.5px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  outline: none;
+}
+
+/* Тип-переключатель */
+.parse-type-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.parse-type-btn {
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.parse-type-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* ── Кнопки действий ────────────────────────────── */
+.parse-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.parse-actions .btn {
+  flex: 1;
+}
+
+/* ── Выбор долга (debt_payment) ─────────────────── */
+.parse-field--debt-select {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.parse-debt-select-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.parse-debt-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 32px 8px 10px;
+  background: var(--bg-input-focus);
+  border: 1.5px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.parse-debt-select-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.parse-debt-info {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+

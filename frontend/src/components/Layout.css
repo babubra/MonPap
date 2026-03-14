@@ -1,0 +1,70 @@
+/* Layout.css */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.layout-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Навбар ─────────────────────────────────────────────────── */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--navbar-height) + var(--safe-area-bottom));
+  padding-bottom: var(--safe-area-bottom);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  border-radius: 0;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  border-top: 1px solid var(--glass-border);
+}
+
+.navbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+
+.navbar-item:hover {
+  color: var(--text-secondary);
+}
+
+.navbar-item--active {
+  color: var(--accent);
+}
+
+.navbar-item--active::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 var(--radius-full) var(--radius-full);
+}
+
+.navbar-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}

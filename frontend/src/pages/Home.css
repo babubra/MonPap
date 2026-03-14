@@ -1,0 +1,208 @@
+/* Home.css */
+
+/* ── Сводка ───────────────────────────────────────────────── */
+.summary-card {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.summary-month {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-item-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.summary-item-icon.income {
+  background: var(--income-bg);
+  color: var(--income);
+}
+
+.summary-item-icon.expense {
+  background: var(--expense-bg);
+  color: var(--expense);
+}
+
+.summary-item-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.summary-item-value {
+  display: block;
+  font-size: var(--font-size-lg);
+}
+
+.summary-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: var(--font-size-lg);
+}
+
+/* ── Последние операции ───────────────────────────────────── */
+.section-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.recent-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.recent-item-comment {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-xs);
+}
+
+.badge-sm {
+  padding: 2px 6px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+}
+
+.recent-item-amount {
+  font-size: var(--font-size-base);
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+/* ── Пустое состояние ─────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-tertiary);
+}
+
+.empty-state p:first-child {
+  font-size: var(--font-size-lg);
+  margin-bottom: 4px;
+}
+
+/* ── Поле ввода ───────────────────────────────────────────── */
+.input-bar {
+  position: fixed;
+  bottom: calc(var(--navbar-height) + var(--safe-area-bottom));
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 0;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  z-index: 50;
+}
+
+.input-bar-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+}
+
+.input-bar-field:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Скелетон-список */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Кнопка записи ────────────────────────────────────────── */
+.recording-active {
+  color: var(--danger) !important;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* ── Спиннер ─────────────────────────────────────────────── */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Toast ошибки ─────────────────────────────────────────── */
+.parse-toast {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--danger-subtle);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+/* ── Секция «Последние» с отступом от input-bar ──────────── */
+.recent-section {
+  padding-bottom: 72px;
+}

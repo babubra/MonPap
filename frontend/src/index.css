@@ -1,0 +1,449 @@
+/* ════════════════════════════════════════════════════════════════
+   MonPap — Дизайн-система
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Google Fonts ──────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── CSS-переменные ────────────────────────────────────────────── */
+:root {
+  /* Типографика */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+
+  /* Скругления */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Тени */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.16);
+  --shadow-glow: 0 0 20px rgba(218, 160, 80, 0.35);
+
+  /* Переходы */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Размеры */
+  --navbar-height: 64px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --content-max-width: 480px;
+}
+
+/* ── Тёмная тема — Летний закат ───────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary: #0e1028;
+  --bg-secondary: #161a3a;
+  --bg-card: rgba(18, 22, 52, 0.82);
+  --bg-card-hover: rgba(26, 30, 64, 0.90);
+  --bg-input: rgba(18, 22, 52, 0.82);
+  --bg-input-focus: rgba(26, 30, 64, 0.92);
+  --bg-navbar: rgba(14, 16, 40, 0.92);
+
+  --text-primary: #f0e6d6;
+  --text-secondary: #cec4dc;
+  --text-tertiary: #8e82a2;
+  --text-inverse: #0e1028;
+
+  --accent: #dea050;
+  --accent-hover: #e8b56a;
+  --accent-subtle: rgba(222, 160, 80, 0.15);
+
+  --success: #5ee8b7;
+  --success-subtle: rgba(94, 232, 183, 0.12);
+  --warning: #fbbf24;
+  --warning-subtle: rgba(251, 191, 36, 0.12);
+  --danger: #ff7eb3;
+  --danger-subtle: rgba(255, 126, 179, 0.12);
+
+  --income: #5ee8b7;
+  --income-bg: rgba(94, 232, 183, 0.1);
+  --expense: #ff7eb3;
+  --expense-bg: rgba(255, 126, 179, 0.1);
+
+  --border: rgba(255, 255, 255, 0.10);
+  --border-focus: rgba(222, 160, 80, 0.5);
+
+  --glass-bg: rgba(18, 22, 52, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+}
+
+/* ── Светлая тема — Рассвет ───────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary: #faf7f2;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.80);
+  --bg-card-hover: rgba(255, 255, 255, 0.90);
+  --bg-input: rgba(255, 255, 255, 0.80);
+  --bg-input-focus: rgba(255, 255, 255, 0.95);
+  --bg-navbar: rgba(252, 249, 244, 0.88);
+
+  --text-primary: #2c2318;
+  --text-secondary: #7a6b5a;
+  --text-tertiary: #b8a998;
+  --text-inverse: #f1f1f4;
+
+  --accent: #d4922b;
+  --accent-hover: #c5841e;
+  --accent-subtle: rgba(212, 146, 43, 0.1);
+
+  --success: #1aab78;
+  --success-subtle: rgba(26, 171, 120, 0.08);
+  --warning: #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.08);
+  --danger: #e8477a;
+  --danger-subtle: rgba(232, 71, 122, 0.08);
+
+  --income: #1aab78;
+  --income-bg: rgba(26, 171, 120, 0.08);
+  --expense: #e8477a;
+  --expense-bg: rgba(232, 71, 122, 0.08);
+
+  --border: rgba(0, 0, 0, 0.09);
+  --border-focus: rgba(212, 146, 43, 0.4);
+
+  --glass-bg: rgba(255, 255, 255, 0.80);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+
+  color-scheme: light;
+}
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── Фон для тёмной темы — закат ────────────────────── */
+[data-theme="dark"] body {
+  background-image: url('/bg-dark.jpg');
+}
+
+/* ── Фон для светлой темы — рассвет ─────────────────── */
+[data-theme="light"] body {
+  background-image: url('/bg-white.jpg');
+}
+
+/* ── Overlay для читаемости поверх фона ──────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: background var(--transition-slow);
+}
+
+[data-theme="dark"] body::before {
+  background: rgba(14, 16, 40, 0.62);
+}
+
+[data-theme="light"] body::before {
+  background: rgba(250, 247, 242, 0.55);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
+
+/* ── Glassmorphism ─────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg);
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-base), transform var(--transition-fast);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.glass-card:active {
+  transform: scale(0.98);
+}
+
+/* ── Кнопки ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  box-shadow: 0 4px 14px var(--accent-subtle);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px var(--accent-subtle);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-input-focus);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+  padding: 14px 32px;
+  font-size: var(--font-size-lg);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ── Инпуты ────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.input:focus {
+  background: var(--bg-input-focus);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ── Утилиты ────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.page {
+  flex: 1;
+  padding-bottom: calc(var(--navbar-height) + var(--safe-area-bottom) + 16px);
+  padding-top: 16px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.badge-income {
+  background: var(--income-bg);
+  color: var(--income);
+}
+
+.badge-expense {
+  background: var(--expense-bg);
+  color: var(--expense);
+}
+
+.text-income { color: var(--income); }
+.text-expense { color: var(--expense); }
+.text-secondary { color: var(--text-secondary); }
+.text-center { text-align: center; }
+
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Анимации ───────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--transition-slow) ease-out;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-input) 25%,
+    var(--bg-input-focus) 50%,
+    var(--bg-input) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+}
+
+/* ── Vaul Drawer ────────────────────────────────────────────── */
+[vaul-drawer] {
+  background: var(--bg-secondary) !important;
+  border-top-left-radius: var(--radius-xl) !important;
+  border-top-right-radius: var(--radius-xl) !important;
+}
+
+[vaul-drawer-overlay] {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}

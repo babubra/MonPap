@@ -1,0 +1,344 @@
+/* TransactionList.css */
+
+/* ── Пресеты периода ────────────────────────────── */
+.tx-period-pills {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.tx-period-pill {
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tx-period-pill.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* ── Навигация месяц/год ────────────────────────── */
+.tx-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.tx-nav-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.tx-nav-btn:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-primary);
+}
+
+.tx-period-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-transform: capitalize;
+  text-align: center;
+  flex: 1;
+}
+
+.tx-period-static {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+/* ── Диапазон дат ───────────────────────────────── */
+.tx-range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tx-range-input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: var(--font-size-sm);
+}
+
+.tx-range-sep {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+/* ── Панель фильтров ────────────────────────────── */
+
+.tx-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tx-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tx-month-nav button {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tx-month-nav button:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-primary);
+}
+
+.tx-month-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  min-width: 110px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.tx-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-search .input {
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+}
+
+/* ── Группировка по дате ────────────────────────── */
+.tx-group {
+  margin-bottom: 16px;
+}
+
+.tx-date-header {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 2px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tx-date-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Список транзакций ──────────────────────────── */
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Карточка транзакции (компактная) ───────────── */
+.tx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;    /* было 14px 16px */
+  cursor: pointer;
+  position: relative;
+  gap: 10px;
+  transition: all var(--transition-fast);
+}
+
+/* Раскрытое состояние */
+.tx-item--expanded {
+  background: var(--bg-input-focus) !important;
+  border-color: var(--border-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+.tx-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Комментарий — по умолчанию обрезается */
+.tx-item-comment {
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all var(--transition-base);
+}
+
+/* Полный текст при раскрытии */
+.tx-item-comment--full {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.tx-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* Подсказка «нажмите ещё раз» */
+.tx-item-hint {
+  font-size: 10px;
+  color: var(--accent);
+  opacity: 0.8;
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+}
+
+.tx-item-amount {
+  font-size: var(--font-size-sm);   /* было base */
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Итого ──────────────────────────────────────── */
+.tx-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.tx-total-amount {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.tx-total-cat {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Фильтр по категории ────────────────────────── */
+.tx-cat-filter {
+  flex-shrink: 0;
+}
+
+.tx-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  max-width: 120px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tx-cat-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.tx-cat-btn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.tx-cat-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  padding: 4px;
+}
+
+.tx-cat-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.tx-cat-option:hover {
+  background: var(--bg-card-hover);
+}
+
+.tx-cat-option.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 500;
+}
+

@@ -1,0 +1,230 @@
+/* Debts.css */
+@import '../components/TransactionList.css';
+
+/* ── Поиск ─────────────────────────────────────── */
+.debts-search {
+  margin-bottom: 12px;
+}
+
+.debts-search-input {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  font-size: var(--font-size-sm);
+}
+
+/* ── Табы ──────────────────────────────────────── */
+.debts-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.debts-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.debts-tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Карточка долга ────────────────────────────── */
+.debt-card {
+  padding: 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.debt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.debt-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.debt-card-name {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.debt-card-direction {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.debt-card-amount {
+  text-align: right;
+}
+
+.debt-card-amount-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  display: block;
+}
+
+.debt-card-amount-paid {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: block;
+}
+
+/* Прогресс-бар */
+.debt-progress {
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.debt-progress-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  transition: width var(--transition-slow);
+  min-width: 2px;
+}
+
+.debt-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.debt-card-closed-badge {
+  font-size: var(--font-size-xs);
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* ── Раскрытая секция платежей ─────────────────── */
+.debt-payments {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.debt-payments-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.debt-payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: var(--font-size-sm);
+}
+
+.debt-payment-item + .debt-payment-item {
+  border-top: 1px solid var(--border);
+}
+
+.debt-payment-date {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.debt-payment-amount {
+  font-weight: 500;
+  color: var(--success);
+}
+
+.debt-payment-comment {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Кнопки действий долга ─────────────────────── */
+.debt-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.debt-card-actions .btn {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  padding: 8px 12px;
+}
+
+/* ── Форма добавления платежа ──────────────────── */
+.payment-form {
+  padding: 16px 16px 32px;
+}
+
+.payment-form-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.payment-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.payment-form-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ── Секция суммы долгов ──────────────────────── */
+.debts-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.debts-summary-card {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+}
+
+.debts-summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.debts-summary-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  display: block;
+}

@@ -1,0 +1,21 @@
+# Используется только для запуска БД в режиме разработки
+# Запуск: docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monpap}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monpap_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-monpap}
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-monpap} -d ${POSTGRES_DB:-monpap}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_dev:
