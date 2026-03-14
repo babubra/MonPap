@@ -46,13 +46,18 @@ async def send_magic_link(email: str, token: str, base_url: str = "") -> bool:
     msg["To"] = email
 
     try:
+        # Порт 465 = implicit TLS (use_tls), порт 587 = STARTTLS (start_tls)
+        use_tls = settings.SMTP_PORT == 465
+        start_tls = settings.SMTP_PORT == 587
+
         await aiosmtplib.send(
             msg,
             hostname=settings.SMTP_HOST,
             port=settings.SMTP_PORT,
             username=settings.SMTP_USER,
             password=settings.SMTP_PASSWORD,
-            use_tls=True,
+            use_tls=use_tls,
+            start_tls=start_tls,
         )
         logger.info(f"Magic Link отправлен на {email}")
         return True
