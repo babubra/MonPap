@@ -14,6 +14,12 @@ export async function hashPin(pin: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Убираем синхронный splash-оверлей из index.html
+function removeSplash() {
+  const splash = document.getElementById('lock-splash');
+  if (splash) splash.remove();
+}
+
 export function useAppLock() {
   const [isLocked, setIsLocked] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
@@ -27,6 +33,11 @@ export function useAppLock() {
     setHasPasskey(!!localStorage.getItem(WEBAUTHN_CRED_KEY));
     setIsLocked(enabled); // Блокируем при старте, если включено
     
+    // Если блокировка не нужна — сразу убираем splash
+    if (!enabled) {
+      removeSplash();
+    }
+
     // Проверка поддержки WebAuthn
     if (window.PublicKeyCredential) {
       setIsSupported(true);
@@ -60,6 +71,7 @@ export function useAppLock() {
     const inputHash = await hashPin(pin);
     if (inputHash === storedHash) {
       setIsLocked(false);
+      removeSplash();
       return true;
     }
     return false;
@@ -145,6 +157,7 @@ export function useAppLock() {
 
       if (assertion) {
         setIsLocked(false);
+        removeSplash();
         return true;
       }
     } catch (e) {

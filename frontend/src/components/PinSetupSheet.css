@@ -1,0 +1,133 @@
+.pin-setup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.pin-setup-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--bg-secondary);
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+[data-theme='light'] .pin-setup-sheet {
+  background: #ffffff;
+}
+
+.pin-setup-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--text-tertiary);
+  margin: 12px auto 0;
+}
+
+.pin-setup-title {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 24px 0 20px;
+}
+
+.pin-setup-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.pin-setup-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.pin-setup-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pin-error .pin-setup-dot.filled {
+  background: var(--expense);
+  border-color: var(--expense);
+}
+
+.pin-error {
+  animation: pinShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes pinShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.pin-error-text {
+  font-size: var(--font-size-sm);
+  color: var(--expense);
+  margin-bottom: 8px;
+  height: 20px;
+}
+
+.pin-setup-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 8px 40px 16px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.pin-setup-key {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pin-setup-key:active {
+  background: var(--bg-input-focus);
+}
+
+.pin-setup-key-empty {
+  background: transparent;
+  pointer-events: none;
+}
+
+.pin-setup-key-action {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.pin-setup-key-action:active {
+  background: var(--bg-card-hover);
+}
+
+.pin-setup-cancel {
+  width: calc(100% - 80px);
+  max-width: 300px;
+  margin-bottom: 16px;
+}

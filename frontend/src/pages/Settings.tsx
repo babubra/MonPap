@@ -12,6 +12,7 @@ import {
   setToken,
 } from '../api';
 import { useAppLock } from '../hooks/useAppLock';
+import { PinSetupSheet } from '../components/PinSetupSheet';
 import './Settings.css';
 
 interface SettingsProps {
@@ -29,6 +30,7 @@ export function Settings({ onLogout }: SettingsProps) {
 
   // Безопасность
   const { isEnabled, hasPasskey, isSupported, enableLock, disableLock, registerPasskey, lockNow } = useAppLock();
+  const [showPinSetup, setShowPinSetup] = useState(false);
 
   useEffect(() => {
     loadAll();
@@ -80,25 +82,20 @@ export function Settings({ onLogout }: SettingsProps) {
   }
 
   // ── Безопасность ─────────────────────────────────
-  async function toggleLock() {
+  function toggleLock() {
     if (isEnabled) {
       if (window.confirm('Отключить защиту приложения?')) {
         disableLock();
       }
     } else {
-      const pin1 = window.prompt('Придумайте 4-значный PIN-код:');
-      if (!pin1 || pin1.length !== 4 || !/^\d+$/.test(pin1)) {
-        alert('PIN-код должен состоять из 4 цифр');
-        return;
-      }
-      const pin2 = window.prompt('Повторите PIN-код:');
-      if (pin1 !== pin2) {
-        alert('PIN-коды не совпадают');
-        return;
-      }
-      await enableLock(pin1);
-      alert('Защита включена!');
+      // Открываем кастомную панель ввода PIN
+      setShowPinSetup(true);
     }
+  }
+
+  async function handlePinConfirmed(pin: string) {
+    setShowPinSetup(false);
+    await enableLock(pin);
   }
 
   async function handleAddPasskey() {
@@ -202,7 +199,8 @@ export function Settings({ onLogout }: SettingsProps) {
               onClick={toggleLock}
               aria-label="Переключить PIN"
             >
-              <div className={`theme-toggle-track ${isEnabled ? '' : 'theme-toggle-track--light'}`}>
+              {/* --light класс = thumb справа = включено */}
+              <div className={`theme-toggle-track ${isEnabled ? 'theme-toggle-track--light' : ''}`}>
                 <div className="theme-toggle-thumb" />
               </div>
             </button>
@@ -252,6 +250,12 @@ export function Settings({ onLogout }: SettingsProps) {
           </div>
         </motion.button>
       </div>
+
+      <PinSetupSheet
+        open={showPinSetup}
+        onClose={() => setShowPinSetup(false)}
+        onConfirm={handlePinConfirmed}
+      />
     </div>
   );
 }
