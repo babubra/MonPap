@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, KeyRound } from 'lucide-react';
 import { auth, setToken } from '../api';
 import './Login.css';
 
@@ -13,6 +13,11 @@ export function Login({ onLogin }: LoginProps) {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+
+  // PIN-код: 6 отдельных полей
+  const [pin, setPin] = useState(['', '', '', '', '', '']);
+  const [pinLoading, setPinLoading] = useState(false);
+  const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,10 +37,70 @@ export function Login({ onLogin }: LoginProps) {
       }
 
       setSent(true);
+      // Фокус на первое поле PIN
+      setTimeout(() => pinRefs.current[0]?.focus(), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка входа');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePinChange = (index: number, value: string) => {
+    // Только цифры
+    const digit = value.replace(/\D/g, '').slice(-1);
+    const newPin = [...pin];
+    newPin[index] = digit;
+    setPin(newPin);
+
+    // Автопереход на следующее поле
+    if (digit && index < 5) {
+      pinRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      pinRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePinPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) {
+      const newPin = pasted.split('');
+      setPin(newPin);
+      pinRefs.current[5]?.focus();
+    }
+  };
+
+  // Автоотправка когда все 6 цифр введены
+  useEffect(() => {
+    const code = pin.join('');
+    if (code.length === 6 && sent) {
+      handlePinSubmit(code);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin]);
+
+  const handlePinSubmit = async (code?: string) => {
+    const pinCode = code || pin.join('');
+    if (pinCode.length !== 6) return;
+
+    setPinLoading(true);
+    setError('');
+
+    try {
+      const result = await auth.verifyPin(email.trim(), pinCode);
+      setToken(result.access_token);
+      onLogin();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Неверный код');
+      setPin(['', '', '', '', '', '']);
+      pinRefs.current[0]?.focus();
+    } finally {
+      setPinLoading(false);
     }
   };
 
@@ -64,15 +129,55 @@ export function Login({ onLogin }: LoginProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Mail size={48} className="login-sent-icon" />
-            <h2>Письмо отправлено!</h2>
+            <KeyRound size={36} className="login-sent-icon" />
+            <h2>Введите код</h2>
             <p>
-              Ссылка для входа отправлена на <strong>{email}</strong>.
-              <br />Проверьте почту.
+              Код отправлен на <strong>{email}</strong>
             </p>
+
+            {/* PIN-код fields */}
+            <div className="pin-input-group" onPaste={handlePinPaste}>
+              {pin.map((digit, i) => (
+                <input
+                  key={i}
+                  ref={el => { pinRefs.current[i] = el; }}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={1}
+                  className="pin-input"
+                  value={digit}
+                  onChange={e => handlePinChange(i, e.target.value)}
+                  onKeyDown={e => handlePinKeyDown(i, e)}
+                  disabled={pinLoading}
+                />
+              ))}
+            </div>
+
+            {error && (
+              <motion.p
+                className="login-error"
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {error}
+              </motion.p>
+            )}
+
+            {pinLoading && (
+              <div className="pin-loading">
+                <Loader2 size={20} className="spin" />
+                <span>Проверяю...</span>
+              </div>
+            )}
+
+            <p className="login-hint">
+              Также можно нажать кнопку в письме
+            </p>
+
             <button
               className="btn btn-ghost btn-sm"
-              onClick={() => { setSent(false); setEmail(''); }}
+              onClick={() => { setSent(false); setEmail(''); setPin(['', '', '', '', '', '']); setError(''); }}
             >
               Другой email
             </button>

@@ -1,4 +1,4 @@
-"""Отправка Magic Link через SMTP."""
+"""Отправка Magic Link и PIN-кода через SMTP."""
 
 import logging
 
@@ -11,18 +11,30 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-async def send_magic_link(email: str, token: str, base_url: str = "") -> bool:
-    """Отправляет Magic Link на указанный email.
+async def send_magic_link(email: str, token: str, base_url: str = "", pin_code: str = "") -> bool:
+    """Отправляет Magic Link и PIN-код на указанный email.
 
     Args:
         email: Email получателя
         token: JWT-токен для верификации
-        base_url: Базовый URL приложения (например, https://monpap.example.com)
+        base_url: Базовый URL приложения
+        pin_code: 6-значный PIN-код для ввода вручную
 
     Returns:
         True если письмо отправлено, False при ошибке.
     """
     verify_url = f"{base_url}/api/auth/verify?token={token}"
+
+    pin_section = ""
+    if pin_code:
+        pin_section = f"""
+        <div style="background: #f0f0f0; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center;">
+            <p style="color: #666; font-size: 13px; margin: 0 0 8px 0;">Или введите код на странице входа:</p>
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #6C5CE7; font-family: monospace;">
+                {pin_code}
+            </div>
+        </div>
+        """
 
     html = f"""
     <div style="font-family: -apple-system, sans-serif; max-width: 400px; margin: 0 auto; padding: 32px;">
@@ -34,14 +46,15 @@ async def send_magic_link(email: str, token: str, base_url: str = "") -> bool:
                   font-weight: 600; margin: 16px 0;">
             Войти в MonPap
         </a>
+        {pin_section}
         <p style="color: #888; font-size: 13px;">
-            Ссылка действительна 15 минут. Если вы не запрашивали вход — проигнорируйте это письмо.
+            Ссылка и код действительны 15 минут. Если вы не запрашивали вход — проигнорируйте это письмо.
         </p>
     </div>
     """
 
     msg = MIMEText(html, "html", "utf-8")
-    msg["Subject"] = "Вход в MonPap"
+    msg["Subject"] = f"Вход в MonPap — код {pin_code}" if pin_code else "Вход в MonPap"
     msg["From"] = settings.SMTP_FROM
     msg["To"] = email
 

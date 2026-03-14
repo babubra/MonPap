@@ -123,6 +123,55 @@
   z-index: 0;
 }
 
+/* PIN-код */
+.pin-input-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 8px;
+}
+
+.pin-input {
+  width: 44px;
+  height: 56px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  font-family: 'Inter', monospace;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pin-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.pin-input:disabled {
+  opacity: 0.5;
+}
+
+.pin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.login-hint {
+  color: var(--text-tertiary) !important;
+  font-size: var(--font-size-xs) !important;
+  margin-top: 4px !important;
+}
+
 /* Спиннер */
 .spin {
   animation: spin 1s linear infinite;

@@ -15,6 +15,11 @@ class AuthVerify(BaseModel):
     token: str
 
 
+class PinVerifyRequest(BaseModel):
+    email: str = Field(..., min_length=3)
+    code: str = Field(..., min_length=6, max_length=6)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

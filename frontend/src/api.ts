@@ -149,6 +149,12 @@ export const auth = {
   verify: (token: string) =>
     request<{ access_token: string }>(`/auth/verify?token=${token}`),
 
+  verifyPin: (email: string, code: string) =>
+    request<{ access_token: string }>('/auth/verify-pin', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    }),
+
   me: () => request<{ id: number; email: string }>('/auth/me'),
 
   logout: () => request('/auth/logout', { method: 'POST' }),
