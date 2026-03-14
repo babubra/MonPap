@@ -2,11 +2,18 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: var(--bg-body);
+  background: #0e1028; /* тёмная тема — явный цвет */
+  /* Дополнительно: блюр на случай рендер-задержки */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+[data-theme='light'] .lock-screen {
+  background: #faf7f2; /* светлая тема */
 }
 
 .lock-screen-header {
