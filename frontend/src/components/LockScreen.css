@@ -1,0 +1,111 @@
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg-body);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.lock-screen-header {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-app-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.lock-prompt {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.lock-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.lock-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--text-tertiary);
+  transition: all 0.2s;
+}
+
+.lock-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.lock-error {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.lock-error .lock-dot.filled {
+  background: var(--expense);
+  border-color: var(--expense);
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.lock-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 0 40px 40px;
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.lock-key {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lock-key:active {
+  background: var(--bg-input-focus);
+}
+
+.lock-key-action {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.lock-key-action:active {
+  background: var(--bg-card-hover);
+}
+
+.lock-key-empty {
+  background: transparent;
+  pointer-events: none;
+}

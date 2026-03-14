@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Drawer } from 'vaul';
 import {
   Landmark, ArrowUpRight, ArrowDownLeft,
-  ChevronDown, ChevronUp, Plus, Trash2, Search,
+  ChevronDown, ChevronUp, Plus, Trash2, Search, Pencil, Check, X,
 } from 'lucide-react';
-import { debts as debtsApi, type Debt, type DebtPayment } from '../api';
+import { debts as debtsApi, counterparts as cpApi, type Debt, type DebtPayment, type Counterpart } from '../api';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import './Debts.css';
 
@@ -55,6 +55,7 @@ export function Debts() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const { formatAmount } = useShowAmounts();
+  const [counterpartsList, setCounterpartsList] = useState<Counterpart[]>([]);
 
   // Форма платежа
   const [payDebtId, setPayDebtId] = useState<number | null>(null);
@@ -63,15 +64,26 @@ export function Debts() {
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
   const [paySaving, setPaySaving] = useState(false);
 
+  // Редактирование долга
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editComment, setEditComment] = useState('');
+  const [editCounterpartId, setEditCounterpartId] = useState<number | ''>('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [confirmDeleteDebtId, setConfirmDeleteDebtId] = useState<number | null>(null);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [active, closed] = await Promise.all([
+      const [active, closed, cps] = await Promise.all([
         debtsApi.list({ is_closed: false }),
         debtsApi.list({ is_closed: true }),
+        cpApi.list(),
       ]);
       setActiveDebts(active);
       setClosedDebts(closed);
+      setCounterpartsList(cps);
     } catch {
       // оффлайн
     } finally {
@@ -123,9 +135,41 @@ export function Debts() {
   async function handleDelete(id: number) {
     try {
       await debtsApi.delete(id);
+      if (expandedId === id) setExpandedId(null);
+      setConfirmDeleteDebtId(null);
       loadData();
     } catch {
       // ошибка
+    }
+  }
+
+  function startEdit(debt: Debt) {
+    setEditingId(debt.id);
+    setEditAmount(String(debt.amount));
+    setEditDate(debt.debt_date.split('T')[0]);
+    setEditComment(debt.comment || '');
+    setEditCounterpartId(debt.counterpart_id ?? '');
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function handleSaveEdit(id: number) {
+    setEditSaving(true);
+    try {
+      await debtsApi.update(id, {
+        amount: String(editAmount) as unknown as Debt['amount'],
+        debt_date: editDate,
+        comment: editComment || undefined,
+        counterpart_id: editCounterpartId !== '' ? Number(editCounterpartId) : null,
+      } as Partial<Debt>);
+      setEditingId(null);
+      loadData();
+    } catch {
+      // ошибка
+    } finally {
+      setEditSaving(false);
     }
   }
 
@@ -246,7 +290,6 @@ export function Debts() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -40 }}
                     transition={{ delay: i * 0.04 }}
-                    onClick={() => setExpandedId(isExpanded ? null : debt.id)}
                   >
                     <div className="debt-card-header">
                       <div className="debt-card-info">
@@ -289,11 +332,17 @@ export function Debts() {
                       </div>
                     )}
 
-                    <div className="debt-card-meta">
+                    <div
+                      className="debt-card-meta debt-card-meta--clickable"
+                      onClick={() => setExpandedId(isExpanded ? null : debt.id)}
+                    >
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {debt.is_closed && <span className="debt-card-closed-badge">✓ Закрыт</span>}
+                        {!debt.is_closed && !isExpanded && (
+                          <span className="debt-card-tap-hint">нажмите для деталей</span>
+                        )}
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--accent)' }}>
                         {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </span>
                     </div>
@@ -301,52 +350,144 @@ export function Debts() {
                     {/* Развёрнутая секция */}
                     {isExpanded && (
                       <div className="debt-payments" onClick={(e) => e.stopPropagation()}>
-                        <div className="debt-payments-title">История платежей</div>
 
-                        {debt.payments.length === 0 ? (
-                          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', paddingBottom: 8 }}>
-                            Платежей пока нет
+                        {/* Форма редактирования */}
+                        {editingId === debt.id ? (
+                          <div className="debt-edit-form">
+                            <div className="debt-edit-form-title">
+                              <Pencil size={13} /> Редактировать долг
+                            </div>
+                            <div className="debt-edit-fields">
+                              <div>
+                                <label className="debt-edit-label">Сумма</label>
+                                <input
+                                  className="input debt-edit-input"
+                                  type="number"
+                                  value={editAmount}
+                                  onChange={(e) => setEditAmount(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="debt-edit-label">Дата</label>
+                                <input
+                                  className="input debt-edit-input"
+                                  type="date"
+                                  value={editDate}
+                                  onChange={(e) => setEditDate(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="debt-edit-label">Субъект</label>
+                                <select
+                                  className="input debt-edit-input"
+                                  value={editCounterpartId}
+                                  onChange={(e) => setEditCounterpartId(e.target.value === '' ? '' : Number(e.target.value))}
+                                >
+                                  <option value="">— без субъекта —</option>
+                                  {counterpartsList.map((cp) => (
+                                    <option key={cp.id} value={cp.id}>{cp.name}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="debt-edit-label">Комментарий</label>
+                                <input
+                                  className="input debt-edit-input"
+                                  type="text"
+                                  placeholder="Необязательно"
+                                  value={editComment}
+                                  onChange={(e) => setEditComment(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="debt-edit-actions">
+                              <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
+                                <X size={13} /> Отмена
+                              </button>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleSaveEdit(debt.id)}
+                                disabled={editSaving || !editAmount || !editDate}
+                              >
+                                {editSaving ? 'Сохранение...' : <><Check size={13} /> Сохранить</>}
+                              </button>
+                            </div>
                           </div>
                         ) : (
-                          debt.payments.map((payment: DebtPayment) => (
-                            <div key={payment.id} className="debt-payment-item">
-                              <div>
-                                <span className="debt-payment-date">
-                                  {new Date(payment.payment_date).toLocaleDateString('ru-RU', {
-                                    day: 'numeric',
-                                    month: 'short',
-                                  })}
-                                </span>
-                                {payment.comment && (
-                                  <span className="debt-payment-comment"> — {payment.comment}</span>
-                                )}
-                              </div>
-                              <span className="debt-payment-amount">
-                                +{formatAmount(payment.amount)} ₽
-                              </span>
-                            </div>
-                          ))
-                        )}
+                          <>
+                            <div className="debt-payments-title">История платежей</div>
 
-                        <div className="debt-card-actions">
-                          {!debt.is_closed && (
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={() => setPayDebtId(debt.id)}
-                            >
-                              <Plus size={14} />
-                              Добавить платёж
-                            </button>
-                          )}
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleDelete(debt.id)}
-                            style={{ color: 'var(--danger)' }}
-                          >
-                            <Trash2 size={14} />
-                            Удалить
-                          </button>
-                        </div>
+                            {debt.payments.length === 0 ? (
+                              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-tertiary)', paddingBottom: 8 }}>
+                                Платежей пока нет
+                              </div>
+                            ) : (
+                              debt.payments.map((payment: DebtPayment) => (
+                                <div key={payment.id} className="debt-payment-item">
+                                  <div>
+                                    <span className="debt-payment-date">
+                                      {new Date(payment.payment_date).toLocaleDateString('ru-RU', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                      })}
+                                    </span>
+                                    {payment.comment && (
+                                      <span className="debt-payment-comment"> — {payment.comment}</span>
+                                    )}
+                                  </div>
+                                  <span className="debt-payment-amount">
+                                    +{formatAmount(payment.amount)} ₽
+                                  </span>
+                                </div>
+                              ))
+                            )}
+
+                            <div className="debt-card-actions">
+                              {!debt.is_closed && (
+                                <button
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => setPayDebtId(debt.id)}
+                                >
+                                  <Plus size={14} />
+                                  Добавить платёж
+                                </button>
+                              )}
+                              <button
+                                className="btn btn-secondary btn-sm debt-edit-icon-btn"
+                                onClick={() => startEdit(debt)}
+                                title="Изменить долг"
+                              >
+                                <Pencil size={15} />
+                              </button>
+                              {confirmDeleteDebtId === debt.id ? (
+                                <>
+                                  <button
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => setConfirmDeleteDebtId(null)}
+                                  >
+                                    Отмена
+                                  </button>
+                                  <button
+                                    className="btn btn-sm"
+                                    style={{ background: 'var(--danger)', color: 'white' }}
+                                    onClick={() => handleDelete(debt.id)}
+                                  >
+                                    <Trash2 size={13} /> Да, удалить
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => setConfirmDeleteDebtId(debt.id)}
+                                  style={{ color: 'var(--danger)' }}
+                                >
+                                  <Trash2 size={14} />
+                                  Удалить
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </motion.div>

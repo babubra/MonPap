@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Eye, EyeOff, Send, Mic, MicOff, Loader, PlusCircle, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Eye, EyeOff, Send, Mic, MicOff, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import {
@@ -309,16 +309,40 @@ export function Home() {
       </motion.div>
 
       {/* Ошибка парсинга */}
-      {parseError && (
-        <motion.div
-          className="parse-toast"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          onClick={() => setParseError('')}
-        >
-          {parseError}
-        </motion.div>
-      )}
+      {parseError && (() => {
+        // Преобразуем техническую ошибку в читаемое сообщение
+        let title = 'Ошибка AI';
+        let detail = 'Попробуйте ещё раз позже.';
+        if (parseError.includes('429') || parseError.toLowerCase().includes('quota')) {
+          title = 'Превышен лимит AI';
+          detail = 'Исчерпан бесплатный лимит запросов Gemini. Подождите немного или введите транзакцию вручную.';
+        } else if (parseError.includes('401') || parseError.toLowerCase().includes('unauthorized')) {
+          title = 'Ошибка авторизации';
+          detail = 'Неверный ключ API. Проверьте настройки.';
+        } else if (parseError.includes('network') || parseError.toLowerCase().includes('failed to fetch')) {
+          title = 'Нет связи';
+          detail = 'Не удалось достучься до AI-сервиса. Проверьте интернет.';
+        } else if (parseError.includes('500') || parseError.includes('502') || parseError.includes('503')) {
+          title = 'Сервер недоступен';
+          detail = 'Временная ошибка сервера. Попробуйте через несколько секунд.';
+        }
+        return (
+          <motion.div
+            className="parse-toast parse-toast--rich"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <AlertTriangle size={16} className="parse-toast-icon" />
+            <div className="parse-toast-body">
+              <span className="parse-toast-title">{title}</span>
+              <span className="parse-toast-detail">{detail}</span>
+            </div>
+            <button className="parse-toast-close" onClick={() => setParseError('')}>
+              <XIcon size={14} />
+            </button>
+          </motion.div>
+        );
+      })()}
 
       {/* Последние транзакции */}
       <div className="recent-section">

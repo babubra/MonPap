@@ -9,13 +9,13 @@
 }
 
 .tx-period-pill {
-  padding: 5px 12px;
+  padding: 7px 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-primary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -58,7 +58,7 @@
 }
 
 .tx-period-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: 500;
   text-transform: capitalize;
   text-align: center;
@@ -142,8 +142,8 @@
 }
 
 .tx-search .input {
-  padding: 8px 12px;
-  font-size: var(--font-size-sm);
+  padding: 10px 14px;
+  font-size: var(--font-size-base);
 }
 
 /* ── Группировка по дате ────────────────────────── */
@@ -182,7 +182,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;    /* было 14px 16px */
+  padding: 14px 16px;
   cursor: pointer;
   position: relative;
   gap: 10px;
@@ -207,7 +207,7 @@
 /* Комментарий — по умолчанию обрезается */
 .tx-item-comment {
   font-weight: 500;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -239,7 +239,7 @@
 }
 
 .tx-item-amount {
-  font-size: var(--font-size-sm);   /* было base */
+  font-size: var(--font-size-base);
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
@@ -250,10 +250,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 4px;
-  margin-top: 4px;
-  border-top: 1px solid var(--border);
-  font-size: var(--font-size-sm);
+  padding: 10px 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
 }
 

@@ -126,14 +126,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  cursor: pointer;
+  padding: 14px 16px;
   transition: background var(--transition-fast);
 }
 
-.ref-mgmt-item-top:hover {
-  background: var(--bg-card-hover);
-}
 
 .ref-mgmt-item-info {
   display: flex;
@@ -145,7 +141,7 @@
 
 .ref-mgmt-item-name {
   font-weight: 500;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
 }
 
 .ref-mgmt-item-hint {
@@ -176,7 +172,7 @@
 
 /* ── Развёрнутая секция AI-подсказки ───────── */
 .ref-mgmt-hint-section {
-  padding: 10px 14px 12px;
+  padding: 12px 16px 14px;
   border-top: 1px solid var(--border);
   background: var(--accent-subtle);
   overflow: hidden;
@@ -216,6 +212,113 @@
   color: var(--text-tertiary);
   margin-top: 6px;
   line-height: 1.4;
+}
+
+/* ── Поля редактирования ─────────────── */
+.ref-mgmt-edit-field {
+  margin-bottom: 12px;
+}
+
+.ref-mgmt-edit-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.ref-mgmt-edit-input {
+  padding: 8px 10px;
+  font-size: var(--font-size-sm);
+}
+
+/* Переключатель типа */
+.ref-mgmt-type-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.ref-mgmt-type-btn {
+  flex: 1;
+  padding: 7px 12px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.ref-mgmt-type-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.ref-mgmt-type-btn.active.expense {
+  border-color: var(--danger);
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+.ref-mgmt-type-btn.active.income {
+  border-color: var(--success);
+  background: var(--success-subtle);
+  color: var(--success);
+}
+
+/* Кнопка сохранения */
+.ref-mgmt-save-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+}
+
+.ref-mgmt-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Строка действий: удалить + сохранить */
+.ref-mgmt-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ref-mgmt-actions-row .ref-mgmt-save-btn {
+  flex: 1;
+  margin-top: 0;
+}
+
+.ref-mgmt-delete-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  padding: 10px 14px;
+}
+
+.ref-mgmt-confirm-label {
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .ref-mgmt-item-btn {

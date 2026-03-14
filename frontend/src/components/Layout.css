@@ -17,7 +17,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(var(--navbar-height) + var(--safe-area-bottom));
+  height: calc(var(--navbar-height, 72px) + var(--safe-area-bottom));
   padding-bottom: var(--safe-area-bottom);
   display: flex;
   align-items: center;
@@ -34,13 +34,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 6px 12px;
+  gap: 3px;
+  padding: 8px 16px;
   color: var(--text-tertiary);
   text-decoration: none;
   transition: all var(--transition-fast);
   border-radius: var(--radius-sm);
   position: relative;
+  min-width: 56px;
 }
 
 .navbar-item:hover {
@@ -64,7 +65,7 @@
 }
 
 .navbar-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.02em;
 }

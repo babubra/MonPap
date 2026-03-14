@@ -1,5 +1,14 @@
 /* ReferenceSheet.css */
 
+/* Фон панели — тема-aware */
+.ref-sheet-drawer {
+  background: #161a3a; /* тёмная тема */
+}
+
+[data-theme='light'] .ref-sheet-drawer {
+  background: #f0f1f7; /* светлая тема — чуть синеватый белый */
+}
+
 .ref-sheet-content {
   padding: 16px 16px 32px;
   max-height: 65dvh;
@@ -15,10 +24,37 @@
   margin: 0 auto 16px;
 }
 
+.ref-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
 .ref-sheet-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.ref-sheet-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-input);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.ref-sheet-close:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-primary);
 }
 
 .ref-sheet-search {

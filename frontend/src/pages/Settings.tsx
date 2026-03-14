@@ -5,12 +5,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Moon, Sun, LogOut, MessageSquare } from 'lucide-react';
+import { Moon, Sun, LogOut, MessageSquare, Shield, ScanFace } from 'lucide-react';
 import {
   settings as settingsApi,
   type UserSettings,
   setToken,
 } from '../api';
+import { useAppLock } from '../hooks/useAppLock';
 import './Settings.css';
 
 interface SettingsProps {
@@ -25,6 +26,9 @@ export function Settings({ onLogout }: SettingsProps) {
   const [customPrompt, setCustomPrompt] = useState('');
   const [promptDirty, setPromptDirty] = useState(false);
   const [promptSaving, setPromptSaving] = useState(false);
+
+  // Безопасность
+  const { isEnabled, hasPasskey, isSupported, enableLock, disableLock, registerPasskey, lockNow } = useAppLock();
 
   useEffect(() => {
     loadAll();
@@ -73,6 +77,37 @@ export function Settings({ onLogout }: SettingsProps) {
   function handleLogout() {
     setToken(null);
     onLogout();
+  }
+
+  // ── Безопасность ─────────────────────────────────
+  async function toggleLock() {
+    if (isEnabled) {
+      if (window.confirm('Отключить защиту приложения?')) {
+        disableLock();
+      }
+    } else {
+      const pin1 = window.prompt('Придумайте 4-значный PIN-код:');
+      if (!pin1 || pin1.length !== 4 || !/^\d+$/.test(pin1)) {
+        alert('PIN-код должен состоять из 4 цифр');
+        return;
+      }
+      const pin2 = window.prompt('Повторите PIN-код:');
+      if (pin1 !== pin2) {
+        alert('PIN-коды не совпадают');
+        return;
+      }
+      await enableLock(pin1);
+      alert('Защита включена!');
+    }
+  }
+
+  async function handleAddPasskey() {
+    try {
+      const ok = await registerPasskey();
+      if (ok) alert('Face ID / Touch ID успешно привязан!');
+    } catch (e: any) {
+      alert('Ошибка привязки биометрии: ' + e.message);
+    }
   }
 
   return (
@@ -148,6 +183,57 @@ export function Settings({ onLogout }: SettingsProps) {
             </button>
           </div>
         )}
+      </div>
+
+      {/* Безопасность */}
+      <div className="settings-section">
+        <div className="settings-section-title">
+          <Shield size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          Безопасность
+        </div>
+        
+        <div className="settings-list">
+          <motion.div className="settings-item glass-card" style={{ marginBottom: 8 }}>
+            <div className="settings-item-info">
+              <span>Защита PIN-кодом</span>
+            </div>
+            <button
+              className="theme-toggle"
+              onClick={toggleLock}
+              aria-label="Переключить PIN"
+            >
+              <div className={`theme-toggle-track ${isEnabled ? '' : 'theme-toggle-track--light'}`}>
+                <div className="theme-toggle-thumb" />
+              </div>
+            </button>
+          </motion.div>
+
+          {isEnabled && (
+            <motion.button
+              className="settings-item glass-card"
+              onClick={lockNow}
+              style={{ marginBottom: isSupported ? 8 : 0, justifyContent: 'center' }}
+            >
+              <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Заблокировать сейчас</span>
+            </motion.button>
+          )}
+
+          {isEnabled && isSupported && (
+            <motion.div className="settings-item glass-card">
+              <div className="settings-item-info">
+                <ScanFace size={20} />
+                <span>Вход по Face ID / Отпечатку</span>
+              </div>
+              {hasPasskey ? (
+                <span className="text-secondary" style={{ fontSize: 'var(--font-size-sm)' }}>Подключено</span>
+              ) : (
+                <button className="btn btn-secondary btn-sm" onClick={handleAddPasskey}>
+                  Подключить
+                </button>
+              )}
+            </motion.div>
+          )}
+        </div>
       </div>
 
       {/* Выход */}

@@ -1,0 +1,41 @@
+/* Transactions.css — табы для Операции */
+
+.tx-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  border: 1px solid var(--border);
+}
+
+.tx-tab {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tx-tab--active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px var(--accent-subtle);
+}
+
+.tx-tab--income.tx-tab--active {
+  background: var(--income);
+  box-shadow: 0 2px 8px var(--income-bg);
+}
+
+.tx-tab--expense.tx-tab--active {
+  background: var(--expense);
+  box-shadow: 0 2px 8px var(--expense-bg);
+}

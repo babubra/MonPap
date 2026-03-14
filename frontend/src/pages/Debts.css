@@ -44,9 +44,8 @@
 
 /* ── Карточка долга ────────────────────────────── */
 .debt-card {
-  padding: 16px;
+  padding: 20px;
   margin-bottom: 8px;
-  cursor: pointer;
 }
 
 .debt-card-header {
@@ -65,7 +64,7 @@
 
 .debt-card-name {
   font-weight: 600;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
 }
 
 .debt-card-direction {
@@ -81,7 +80,7 @@
 }
 
 .debt-card-amount-value {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: 600;
   display: block;
 }
@@ -227,4 +226,82 @@
   font-size: var(--font-size-lg);
   font-weight: 600;
   display: block;
+}
+
+/* ── Кликабельный meta-блок (стрелка) ──────────────────── */
+.debt-card-meta--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  padding: 4px 2px;
+  margin: -4px -2px;
+}
+
+.debt-card-meta--clickable:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.debt-card-tap-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ── Форма редактирования долга ─────────────────────────── */
+.debt-edit-form {
+  padding: 4px 0 8px;
+}
+
+.debt-edit-form-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.debt-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.debt-edit-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.debt-edit-input {
+  padding: 8px 10px;
+  font-size: var(--font-size-sm);
+}
+
+.debt-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.debt-edit-actions .btn {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  padding: 8px 12px;
+}
+
+/* Иконка редактирования долга */
+.debt-edit-icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -60,7 +60,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
     counterpart_id: result.counterpart_id || null,
     counterpart_name: result.counterpart_name || null,
     debt_id: null,
-    comment: result.comment || '',
+    comment: result.comment || rawText || '',
     date: result.date || new Date().toISOString().split('T')[0],
     raw_text: rawText,
   });

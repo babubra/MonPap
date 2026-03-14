@@ -5,7 +5,7 @@
 
 import { useState, useMemo } from 'react';
 import { Drawer } from 'vaul';
-import { Check, Plus } from 'lucide-react';
+import { Check, Plus, X } from 'lucide-react';
 import './ReferenceSheet.css';
 
 export interface ReferenceItem {
@@ -78,15 +78,35 @@ export function ReferenceSheet({
       <Drawer.Portal>
         <Drawer.Overlay onClick={() => onOpenChange(false)} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.5)' }} />
         <Drawer.Content
+          className="ref-sheet-drawer"
           style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 301,
-            background: 'var(--bg-secondary)',
             borderTopLeftRadius: 'var(--radius-xl)', borderTopRightRadius: 'var(--radius-xl)',
+            boxShadow: '0 -4px 40px rgba(213, 163, 65, 0.35), 0 -1px 0 rgba(213, 163, 65, 0.6)',
+            overflow: 'hidden',
           }}
         >
+          {/* Градиентная шапка с accent-полосой */}
+          <div style={{
+            background: 'linear-gradient(180deg, rgba(213,163,65,0.18) 0%, rgba(213,163,65,0.0) 100%)',
+            padding: '10px 16px 6px',
+            borderTop: '2px solid rgba(213, 163, 65, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+          }}>
+            <div style={{ width: 36, height: 4, borderRadius: 99, background: 'rgba(213,163,65,0.7)' }} />
+          </div>
           <div className="ref-sheet-content">
-            <div className="ref-sheet-handle" />
-            <Drawer.Title className="ref-sheet-title">{title}</Drawer.Title>
+            <div className="ref-sheet-header">
+              <Drawer.Title className="ref-sheet-title">{title}</Drawer.Title>
+              <button
+                className="ref-sheet-close"
+                onClick={() => onOpenChange(false)}
+                aria-label="Закрыть"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
             <input
               className="input ref-sheet-search"

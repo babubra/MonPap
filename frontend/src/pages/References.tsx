@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Tag, Users, Trash2, Plus, Sparkles, Check, Search } from 'lucide-react';
+import { Tag, Users, Trash2, Plus, Sparkles, Check, Search, Pencil } from 'lucide-react';
 import {
   categories as catApi,
   counterparts as cpApi,
@@ -24,6 +24,8 @@ export function References() {
   const [catSearch, setCatSearch] = useState('');
   const [expandedCatId, setExpandedCatId] = useState<number | null>(null);
   const [catHints, setCatHints] = useState<Record<number, string>>({});
+  const [catEditNames, setCatEditNames] = useState<Record<number, string>>({});
+  const [catEditTypes, setCatEditTypes] = useState<Record<number, 'income' | 'expense'>>({});
 
   // Субъекты
   const [counterpartsList, setCounterpartsList] = useState<Counterpart[]>([]);
@@ -31,9 +33,12 @@ export function References() {
   const [cpSearch, setCpSearch] = useState('');
   const [expandedCpId, setExpandedCpId] = useState<number | null>(null);
   const [cpHints, setCpHints] = useState<Record<number, string>>({});
+  const [cpEditNames, setCpEditNames] = useState<Record<number, string>>({});
 
   const [loading, setLoading] = useState(true);
   const [savingHint, setSavingHint] = useState<number | null>(null);
+  const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<number | null>(null);
+  const [confirmDeleteCpId, setConfirmDeleteCpId] = useState<number | null>(null);
 
   useEffect(() => {
     loadAll();
@@ -47,12 +52,25 @@ export function References() {
       setCounterpartsList(cps);
 
       const ch: Record<number, string> = {};
-      cats.forEach((c) => { ch[c.id] = c.ai_hint || ''; });
+      const cn: Record<number, string> = {};
+      const ct: Record<number, 'income' | 'expense'> = {};
+      cats.forEach((c) => {
+        ch[c.id] = c.ai_hint || '';
+        cn[c.id] = c.name;
+        ct[c.id] = c.type as 'income' | 'expense';
+      });
       setCatHints(ch);
+      setCatEditNames(cn);
+      setCatEditTypes(ct);
 
       const cph: Record<number, string> = {};
-      cps.forEach((cp) => { cph[cp.id] = cp.ai_hint || ''; });
+      const cpn: Record<number, string> = {};
+      cps.forEach((cp) => {
+        cph[cp.id] = cp.ai_hint || '';
+        cpn[cp.id] = cp.name;
+      });
       setCpHints(cph);
+      setCpEditNames(cpn);
     } catch {
       // оффлайн
     } finally {
@@ -77,17 +95,34 @@ export function References() {
       await catApi.delete(id);
       setCategoriesList((prev) => prev.filter((c) => c.id !== id));
       if (expandedCatId === id) setExpandedCatId(null);
+      setConfirmDeleteCatId(null);
     } catch { /* ошибка */ }
   }
 
-  async function saveCatHint(id: number) {
+  async function saveCategory(id: number) {
     const hint = catHints[id] ?? '';
+    const editName = catEditNames[id];
+    const editType = catEditTypes[id];
+    const cat = categoriesList.find((c) => c.id === id);
+    if (!cat) return;
+
+    // Собираем только изменённые поля
+    const patch: Partial<Pick<Category, 'name' | 'type'> & { ai_hint: string | undefined }> = {};
+    if (editName && editName.trim() && editName.trim() !== cat.name) patch.name = editName.trim();
+    if (editType && editType !== cat.type) patch.type = editType;
+    if (hint !== (cat.ai_hint || '')) patch.ai_hint = hint || undefined;
+
+    if (Object.keys(patch).length === 0) return; // нет изменений
+
     setSavingHint(id);
     try {
-      const updated = await catApi.update(id, { ai_hint: hint || undefined });
+      const updated = await catApi.update(id, patch);
       setCategoriesList((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ai_hint: updated.ai_hint } : c))
+        prev.map((c) => (c.id === id ? { ...c, name: updated.name, type: updated.type, ai_hint: updated.ai_hint } : c))
       );
+      // Синхронизируем локальный стейт редактирования
+      setCatEditNames((p) => ({ ...p, [id]: updated.name }));
+      setCatEditTypes((p) => ({ ...p, [id]: updated.type as 'income' | 'expense' }));
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -101,6 +136,7 @@ export function References() {
       const created = await cpApi.create({ name: newCpName.trim() });
       setCounterpartsList((prev) => [...prev, created]);
       setCpHints((prev) => ({ ...prev, [created.id]: '' }));
+      setCpEditNames((prev) => ({ ...prev, [created.id]: created.name }));
       setNewCpName('');
     } catch { /* ошибка */ }
   }
@@ -110,17 +146,29 @@ export function References() {
       await cpApi.delete(id);
       setCounterpartsList((prev) => prev.filter((c) => c.id !== id));
       if (expandedCpId === id) setExpandedCpId(null);
+      setConfirmDeleteCpId(null);
     } catch { /* ошибка */ }
   }
 
-  async function saveCpHint(id: number) {
+  async function saveCounterpart(id: number) {
     const hint = cpHints[id] ?? '';
+    const editName = cpEditNames[id];
+    const cp = counterpartsList.find((c) => c.id === id);
+    if (!cp) return;
+
+    const patch: Partial<Pick<Counterpart, 'name'> & { ai_hint: string | undefined }> = {};
+    if (editName && editName.trim() && editName.trim() !== cp.name) patch.name = editName.trim();
+    if (hint !== (cp.ai_hint || '')) patch.ai_hint = hint || undefined;
+
+    if (Object.keys(patch).length === 0) return;
+
     setSavingHint(id);
     try {
-      const updated = await cpApi.update(id, { ai_hint: hint || undefined });
+      const updated = await cpApi.update(id, patch);
       setCounterpartsList((prev) =>
-        prev.map((cp) => (cp.id === id ? { ...cp, ai_hint: updated.ai_hint } : cp))
+        prev.map((c) => (c.id === id ? { ...c, name: updated.name, ai_hint: updated.ai_hint } : c))
       );
+      setCpEditNames((p) => ({ ...p, [id]: updated.name }));
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -194,16 +242,16 @@ export function References() {
                 : filteredCats.map((cat) => {
                     const isExpanded = expandedCatId === cat.id;
                     const hintValue = catHints[cat.id] ?? '';
+                    const editName = catEditNames[cat.id] ?? cat.name;
+                    const editType = catEditTypes[cat.id] ?? cat.type;
+                    const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '');
                     return (
                       <motion.div
                         key={cat.id}
                         className={`ref-mgmt-item ${isExpanded ? 'ref-mgmt-item--expanded' : ''}`}
                         layout
                       >
-                        <div
-                          className="ref-mgmt-item-top"
-                          onClick={() => setExpandedCatId(isExpanded ? null : cat.id)}
-                        >
+                        <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
                             <span className="ref-mgmt-item-name">
                               {cat.name}
@@ -213,9 +261,17 @@ export function References() {
                           <span className={`ref-mgmt-item-type ${cat.type === 'income' ? 'badge-income' : 'badge-expense'}`}>
                             {cat.type === 'income' ? 'доход' : 'расход'}
                           </span>
-                          <div className="ref-mgmt-item-actions" onClick={(e) => e.stopPropagation()}>
-                            <button className="ref-mgmt-item-btn danger" onClick={() => deleteCategory(cat.id)} aria-label="Удалить">
-                              <Trash2 size={14} />
+                          <div className="ref-mgmt-item-actions">
+                            <button
+                              className="ref-mgmt-item-btn"
+                              onClick={() => {
+                                setCatEditNames((p) => ({ ...p, [cat.id]: cat.name }));
+                                setCatEditTypes((p) => ({ ...p, [cat.id]: cat.type as 'income' | 'expense' }));
+                                setExpandedCatId(isExpanded ? null : cat.id);
+                              }}
+                              aria-label="Редактировать"
+                            >
+                              <Pencil size={14} />
                             </button>
                           </div>
                         </div>
@@ -229,34 +285,97 @@ export function References() {
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <div className="ref-mgmt-hint-label">
-                                <Sparkles size={12} /> Синонимы для AI
+                              {/* Название категории */}
+                              <div className="ref-mgmt-edit-field">
+                                <label className="ref-mgmt-edit-label">Название</label>
+                                <input
+                                  className="input ref-mgmt-edit-input"
+                                  value={editName}
+                                  onChange={(e) => setCatEditNames((p) => ({ ...p, [cat.id]: e.target.value }))}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveCategory(cat.id)}
+                                  placeholder="Название категории"
+                                />
                               </div>
-                              <div className="ref-mgmt-hint-row">
+
+                              {/* Тип категории */}
+                              <div className="ref-mgmt-edit-field">
+                                <label className="ref-mgmt-edit-label">Тип</label>
+                                <div className="ref-mgmt-type-toggle">
+                                  <button
+                                    className={`ref-mgmt-type-btn ${editType === 'expense' ? 'active expense' : ''}`}
+                                    onClick={() => setCatEditTypes((p) => ({ ...p, [cat.id]: 'expense' }))}
+                                  >
+                                    Расход
+                                  </button>
+                                  <button
+                                    className={`ref-mgmt-type-btn ${editType === 'income' ? 'active income' : ''}`}
+                                    onClick={() => setCatEditTypes((p) => ({ ...p, [cat.id]: 'income' }))}
+                                  >
+                                    Доход
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* AI-подсказка */}
+                              <div className="ref-mgmt-edit-field">
+                                <div className="ref-mgmt-hint-label">
+                                  <Sparkles size={12} /> Синонимы для AI
+                                </div>
                                 <input
                                   className="input ref-mgmt-hint-input"
                                   placeholder="ркк, риэлт, Сергей Риэлт..."
                                   value={hintValue}
                                   onChange={(e) => setCatHints((p) => ({ ...p, [cat.id]: e.target.value }))}
-                                  onKeyDown={(e) => e.key === 'Enter' && saveCatHint(cat.id)}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveCategory(cat.id)}
                                 />
-                                <button
-                                  className="btn btn-primary btn-sm ref-mgmt-hint-save"
-                                  onClick={() => saveCatHint(cat.id)}
-                                  disabled={savingHint === cat.id}
-                                >
-                                  {savingHint === cat.id ? '...' : <Check size={14} />}
-                                </button>
+                                <p className="ref-mgmt-hint-help">
+                                  Слова-синонимы через запятую. AI использует их для распознавания.
+                                </p>
                               </div>
-                              <p className="ref-mgmt-hint-help">
-                                Слова-синонимы через запятую. AI использует их для распознавания.
-                              </p>
+
+                              {/* Кнопки действий */}
+                              <div className="ref-mgmt-actions-row">
+                                {confirmDeleteCatId === cat.id ? (
+                                  <>
+                                    <span className="ref-mgmt-confirm-label">Удалить категорию?</span>
+                                    <button
+                                      className="btn btn-secondary btn-sm"
+                                      onClick={() => setConfirmDeleteCatId(null)}
+                                    >
+                                      Отмена
+                                    </button>
+                                    <button
+                                      className="btn btn-danger-outline ref-mgmt-delete-btn"
+                                      onClick={() => deleteCategory(cat.id)}
+                                    >
+                                      <Trash2 size={14} /> Да, удалить
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      className="btn btn-danger-outline ref-mgmt-delete-btn"
+                                      onClick={() => setConfirmDeleteCatId(cat.id)}
+                                    >
+                                      <Trash2 size={14} /> Удалить
+                                    </button>
+                                    <button
+                                      className="btn btn-primary ref-mgmt-save-btn"
+                                      onClick={() => saveCategory(cat.id)}
+                                      disabled={savingHint === cat.id || !hasChanges || !editName.trim()}
+                                    >
+                                      {savingHint === cat.id ? 'Сохранение...' : <><Check size={14} /> Сохранить</>}
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </motion.div>
                     );
                   })}
+
           </div>
 
           {/* Добавить */}
@@ -314,25 +433,31 @@ export function References() {
                 : filteredCps.map((cp) => {
                     const isExpanded = expandedCpId === cp.id;
                     const hintValue = cpHints[cp.id] ?? '';
+                    const editName = cpEditNames[cp.id] ?? cp.name;
+                    const hasChanges = editName.trim() !== cp.name || hintValue !== (cp.ai_hint || '');
                     return (
                       <motion.div
                         key={cp.id}
                         className={`ref-mgmt-item ${isExpanded ? 'ref-mgmt-item--expanded' : ''}`}
                         layout
                       >
-                        <div
-                          className="ref-mgmt-item-top"
-                          onClick={() => setExpandedCpId(isExpanded ? null : cp.id)}
-                        >
+                        <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
                             <span className="ref-mgmt-item-name">
                               {cp.name}
                               {cp.ai_hint && <Sparkles size={12} className="ref-mgmt-ai-indicator" />}
                             </span>
                           </div>
-                          <div className="ref-mgmt-item-actions" onClick={(e) => e.stopPropagation()}>
-                            <button className="ref-mgmt-item-btn danger" onClick={() => deleteCounterpart(cp.id)} aria-label="Удалить">
-                              <Trash2 size={14} />
+                          <div className="ref-mgmt-item-actions">
+                            <button
+                              className="ref-mgmt-item-btn"
+                              onClick={() => {
+                                setCpEditNames((p) => ({ ...p, [cp.id]: cp.name }));
+                                setExpandedCpId(isExpanded ? null : cp.id);
+                              }}
+                              aria-label="Редактировать"
+                            >
+                              <Pencil size={14} />
                             </button>
                           </div>
                         </div>
@@ -346,28 +471,71 @@ export function References() {
                               exit={{ opacity: 0, height: 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <div className="ref-mgmt-hint-label">
-                                <Sparkles size={12} /> Синонимы для AI
+                              {/* Имя субъекта */}
+                              <div className="ref-mgmt-edit-field">
+                                <label className="ref-mgmt-edit-label">Название</label>
+                                <input
+                                  className="input ref-mgmt-edit-input"
+                                  value={editName}
+                                  onChange={(e) => setCpEditNames((p) => ({ ...p, [cp.id]: e.target.value }))}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveCounterpart(cp.id)}
+                                  placeholder="Имя субъекта"
+                                />
                               </div>
-                              <div className="ref-mgmt-hint-row">
+
+                              {/* AI-подсказка */}
+                              <div className="ref-mgmt-edit-field">
+                                <div className="ref-mgmt-hint-label">
+                                  <Sparkles size={12} /> Синонимы для AI
+                                </div>
                                 <input
                                   className="input ref-mgmt-hint-input"
                                   placeholder="мамочка, мать, родители..."
                                   value={hintValue}
                                   onChange={(e) => setCpHints((p) => ({ ...p, [cp.id]: e.target.value }))}
-                                  onKeyDown={(e) => e.key === 'Enter' && saveCpHint(cp.id)}
+                                  onKeyDown={(e) => e.key === 'Enter' && saveCounterpart(cp.id)}
                                 />
-                                <button
-                                  className="btn btn-primary btn-sm ref-mgmt-hint-save"
-                                  onClick={() => saveCpHint(cp.id)}
-                                  disabled={savingHint === cp.id}
-                                >
-                                  {savingHint === cp.id ? '...' : <Check size={14} />}
-                                </button>
+                                <p className="ref-mgmt-hint-help">
+                                  Слова-синонимы через запятую. AI использует их для распознавания.
+                                </p>
                               </div>
-                              <p className="ref-mgmt-hint-help">
-                                Слова-синонимы через запятую. AI использует их для распознавания.
-                              </p>
+
+                              {/* Кнопки действий */}
+                              <div className="ref-mgmt-actions-row">
+                                {confirmDeleteCpId === cp.id ? (
+                                  <>
+                                    <span className="ref-mgmt-confirm-label">Удалить субъекта?</span>
+                                    <button
+                                      className="btn btn-secondary btn-sm"
+                                      onClick={() => setConfirmDeleteCpId(null)}
+                                    >
+                                      Отмена
+                                    </button>
+                                    <button
+                                      className="btn btn-danger-outline ref-mgmt-delete-btn"
+                                      onClick={() => deleteCounterpart(cp.id)}
+                                    >
+                                      <Trash2 size={14} /> Да, удалить
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      className="btn btn-danger-outline ref-mgmt-delete-btn"
+                                      onClick={() => setConfirmDeleteCpId(cp.id)}
+                                    >
+                                      <Trash2 size={14} /> Удалить
+                                    </button>
+                                    <button
+                                      className="btn btn-primary ref-mgmt-save-btn"
+                                      onClick={() => saveCounterpart(cp.id)}
+                                      disabled={savingHint === cp.id || !hasChanges || !editName.trim()}
+                                    >
+                                      {savingHint === cp.id ? 'Сохранение...' : <><Check size={14} /> Сохранить</>}
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             </motion.div>
                           )}
                         </AnimatePresence>

@@ -89,7 +89,7 @@ function getPeriodDates(
 }
 
 interface TransactionListProps {
-  type: 'income' | 'expense';
+  type?: 'income' | 'expense';
 }
 
 export function TransactionList({ type }: TransactionListProps) {
@@ -116,6 +116,7 @@ export function TransactionList({ type }: TransactionListProps) {
   // Загружаем категории один раз
   useEffect(() => {
     catApi.list(type).then(setCategories).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
   const loadData = useCallback(async () => {
@@ -123,7 +124,7 @@ export function TransactionList({ type }: TransactionListProps) {
     try {
       const periodParams = getPeriodDates(periodMode, year, month, rangeFrom, rangeTo);
       const data = await txApi.list({
-        type,
+        type: type || undefined,
         ...periodParams,
         category_id: selectedCatId ?? undefined,
         search: search || undefined,
@@ -311,7 +312,20 @@ export function TransactionList({ type }: TransactionListProps) {
         </div>
       </div>
 
-      {/* ── Список ──────────────────────────────────────────────── */}
+      {/* Итого — только для Доходов и Расходов, не для общего списка */}
+      {!loading && items.length > 0 && !!type && (
+        <div className="tx-total">
+          <span>
+            {items.length} записей
+            {selectedCat && <span className="tx-total-cat"> · {selectedCat.name}</span>}
+          </span>
+          <span className={`tx-total-amount amount ${type === 'income' ? 'text-income' : type === 'expense' ? 'text-expense' : ''}`}>
+            {type === 'income' ? '+' : type === 'expense' ? '-' : ''}{formatAmount(total)} ₽
+          </span>
+        </div>
+      )}
+
+
       {loading ? (
         <div className="skeleton-list">
           {[1, 2, 3, 4].map((i) => (
@@ -363,8 +377,8 @@ export function TransactionList({ type }: TransactionListProps) {
                             <span className="tx-item-hint">Нажмите ещё раз для редактирования</span>
                           )}
                         </div>
-                        <span className={`tx-item-amount amount ${type === 'income' ? 'text-income' : 'text-expense'}`}>
-                          {type === 'income' ? '+' : '-'}
+                        <span className={`tx-item-amount amount ${tx.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                          {tx.type === 'income' ? '+' : '-'}
                           {formatAmount(tx.amount)} ₽
                         </span>
                       </motion.div>
@@ -375,18 +389,7 @@ export function TransactionList({ type }: TransactionListProps) {
             ))}
           </AnimatePresence>
 
-          {/* Итого */}
-          <div className="tx-total">
-            <span>
-              {items.length} записей
-              {selectedCat && <span className="tx-total-cat"> · {selectedCat.name}</span>}
-            </span>
-            <span className={`tx-total-amount amount ${type === 'income' ? 'text-income' : 'text-expense'}`}>
-              {type === 'income' ? '+' : '-'}
-              {formatAmount(total)} ₽
-            </span>
-          </div>
-        </>
+          </>
       )}
 
       <TransactionDetailsSheet
