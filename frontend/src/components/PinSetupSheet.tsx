@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Delete } from 'lucide-react';
 import './PinSetupSheet.css';
 
 interface PinSetupSheetProps {
@@ -16,6 +15,14 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
   const [firstPin, setFirstPin] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Фокус на input при открытии — показывает нативную клавиатуру
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [open, step]);
 
   function reset() {
     setStep('enter');
@@ -24,38 +31,31 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
     setError(false);
   }
 
-  function handleDigit(d: string) {
-    if (pin.length >= 4) return;
-    const newPin = pin + d;
-    setPin(newPin);
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setPin(val);
     setError(false);
 
-    if (newPin.length === 4) {
-      setTimeout(() => {
-        if (step === 'enter') {
-          setFirstPin(newPin);
-          setPin('');
-          setStep('confirm');
-        } else {
-          // Подтверждение
-          if (newPin === firstPin) {
-            onConfirm(newPin);
+    if (val.length === 4) {
+      if (step === 'enter') {
+        setFirstPin(val);
+        setPin('');
+        setStep('confirm');
+      } else {
+        if (val === firstPin) {
+          setTimeout(() => {
+            onConfirm(val);
             reset();
-          } else {
-            setError(true);
-            setTimeout(() => {
-              setPin('');
-              setError(false);
-            }, 600);
-          }
+          }, 150);
+        } else {
+          setError(true);
+          setTimeout(() => {
+            setPin('');
+            setError(false);
+          }, 600);
         }
-      }, 150); // небольшая задержка чтобы 4-я точка успела отрисоваться
+      }
     }
-  }
-
-  function handleBack() {
-    setPin(p => p.slice(0, -1));
-    setError(false);
   }
 
   if (!open) return null;
@@ -69,7 +69,7 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={() => { reset(); onClose(); }}
       >
         <motion.div
           className="pin-setup-sheet"
@@ -83,7 +83,11 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
 
           <p className="pin-setup-title">{title}</p>
 
-          <div className={`pin-setup-dots ${error ? 'pin-error' : ''}`}>
+          {/* Точки индикатора */}
+          <div
+            className={`pin-setup-dots ${error ? 'pin-error' : ''}`}
+            onClick={() => inputRef.current?.focus()}
+          >
             {[1, 2, 3, 4].map(idx => (
               <div key={idx} className={`pin-setup-dot ${pin.length >= idx ? 'filled' : ''}`} />
             ))}
@@ -91,20 +95,29 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
 
           {error && <p className="pin-error-text">PIN-коды не совпадают</p>}
 
-          <div className="pin-setup-numpad">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-              <button key={num} className="pin-setup-key" onClick={() => handleDigit(num.toString())}>
-                {num}
-              </button>
-            ))}
-            <div className="pin-setup-key pin-setup-key-empty" />
-            <button className="pin-setup-key" onClick={() => handleDigit('0')}>0</button>
-            <button className="pin-setup-key pin-setup-key-action" onClick={handleBack}>
-              <Delete size={22} />
-            </button>
-          </div>
+          {/* Подсказка — тап для открытия клавиатуры */}
+          <p className="pin-tap-hint" onClick={() => inputRef.current?.focus()}>
+            Нажмите для ввода
+          </p>
 
-          <button className="btn btn-secondary pin-setup-cancel" onClick={() => { reset(); onClose(); }}>
+          {/* Скрытый input — вызывает нативную числовую клавиатуру */}
+          <input
+            ref={inputRef}
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={pin}
+            onChange={handleChange}
+            maxLength={4}
+            autoComplete="off"
+            className="pin-setup-hidden-input"
+            aria-label="Введите PIN-код"
+          />
+
+          <button
+            className="btn btn-secondary pin-setup-cancel"
+            onClick={() => { reset(); onClose(); }}
+          >
             Отмена
           </button>
         </motion.div>

@@ -13,31 +13,6 @@
     <title>MonPap</title>
   </head>
   <body>
-    <!-- Синхронный оверлей блокировки: показывается ДО загрузки React, если PIN включён -->
-    <!-- Убирается в useAppLock.ts после инициализации -->
-    <script>
-      (function() {
-        var theme = localStorage.getItem('monpap_theme') || 'dark';
-        var lockEnabled = localStorage.getItem('monpap_lock_enabled') === 'true';
-        if (lockEnabled) {
-          var splash = document.createElement('div');
-          splash.id = 'lock-splash';
-          splash.style.cssText = [
-            'position:fixed',
-            'inset:0',
-            'z-index:99999',
-            'background:' + (theme === 'light' ? '#faf7f2' : '#0e1028'),
-            'display:flex',
-            'flex-direction:column',
-            'align-items:center',
-            'justify-content:center',
-            'font-family:system-ui,sans-serif',
-          ].join(';');
-          splash.innerHTML = '<span style="font-size:2rem;font-weight:700;color:#d5a341;letter-spacing:0.04em;">MonPap</span>';
-          document.documentElement.appendChild(splash);
-        }
-      })();
-    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

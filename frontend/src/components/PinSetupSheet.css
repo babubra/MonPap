@@ -16,10 +16,12 @@
   background: var(--bg-secondary);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-bottom: env(safe-area-inset-bottom, 24px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Резервируем место для клавиатуры */
+  min-height: 240px;
 }
 
 [data-theme='light'] .pin-setup-sheet {
@@ -37,27 +39,29 @@
 .pin-setup-title {
   font-size: var(--font-size-base);
   color: var(--text-secondary);
-  margin: 24px 0 20px;
+  margin: 28px 0 24px;
 }
 
 .pin-setup-dots {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
 }
 
 .pin-setup-dot {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid var(--text-tertiary);
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
 .pin-setup-dot.filled {
   background: var(--accent);
   border-color: var(--accent);
+  transform: scale(1.1);
 }
 
 .pin-error .pin-setup-dot.filled {
@@ -79,55 +83,30 @@
 .pin-error-text {
   font-size: var(--font-size-sm);
   color: var(--expense);
-  margin-bottom: 8px;
-  height: 20px;
+  margin: 4px 0 8px;
+  min-height: 20px;
 }
 
-.pin-setup-numpad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 8px 40px 16px;
-  max-width: 380px;
-  width: 100%;
-}
-
-.pin-setup-key {
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: none;
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.pin-tap-hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin: 8px 0 20px;
   cursor: pointer;
-  transition: background 0.1s;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.pin-setup-key:active {
-  background: var(--bg-input-focus);
-}
-
-.pin-setup-key-empty {
-  background: transparent;
+/* Скрытый input — только для вызова клавиатуры */
+.pin-setup-hidden-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
   pointer-events: none;
-}
-
-.pin-setup-key-action {
-  background: transparent;
-  color: var(--text-secondary);
-}
-
-.pin-setup-key-action:active {
-  background: var(--bg-card-hover);
+  /* НЕ display:none — иначе focus не работает на iOS */
 }
 
 .pin-setup-cancel {
   width: calc(100% - 80px);
   max-width: 300px;
+  margin-top: 4px;
   margin-bottom: 16px;
 }

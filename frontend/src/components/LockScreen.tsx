@@ -9,8 +9,16 @@ export function LockScreen() {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
 
+  // Сброс состояния PIN при каждом показе лок-скрина
   useEffect(() => {
-    // Автоматический вызов Face ID при открытии лок-скрина, если он включен
+    if (isLocked) {
+      setPin('');
+      setError(false);
+    }
+  }, [isLocked]);
+
+  useEffect(() => {
+    // Автоматический вызов Face ID при открытии лок-скрина
     if (isLocked && hasPasskey) {
       unlockWithPasskey();
     }

@@ -13,6 +13,7 @@ import {
 } from '../api';
 import { useAppLock } from '../hooks/useAppLock';
 import { PinSetupSheet } from '../components/PinSetupSheet';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import './Settings.css';
 
 interface SettingsProps {
@@ -31,6 +32,7 @@ export function Settings({ onLogout }: SettingsProps) {
   // Безопасность
   const { isEnabled, hasPasskey, isSupported, enableLock, disableLock, registerPasskey, lockNow } = useAppLock();
   const [showPinSetup, setShowPinSetup] = useState(false);
+  const [showConfirmDisable, setShowConfirmDisable] = useState(false);
 
   useEffect(() => {
     loadAll();
@@ -84,13 +86,16 @@ export function Settings({ onLogout }: SettingsProps) {
   // ── Безопасность ─────────────────────────────────
   function toggleLock() {
     if (isEnabled) {
-      if (window.confirm('Отключить защиту приложения?')) {
-        disableLock();
-      }
+      setShowConfirmDisable(true);
     } else {
       // Открываем кастомную панель ввода PIN
       setShowPinSetup(true);
     }
+  }
+
+  function handleConfirmDisable() {
+    setShowConfirmDisable(false);
+    disableLock();
   }
 
   async function handlePinConfirmed(pin: string) {
@@ -255,6 +260,16 @@ export function Settings({ onLogout }: SettingsProps) {
         open={showPinSetup}
         onClose={() => setShowPinSetup(false)}
         onConfirm={handlePinConfirmed}
+      />
+
+      <ConfirmDialog
+        open={showConfirmDisable}
+        title="Защита PIN-кодом"
+        message="Отключить защиту приложения?"
+        confirmText="Отключить"
+        cancelText="Отмена"
+        onConfirm={handleConfirmDisable}
+        onCancel={() => setShowConfirmDisable(false)}
       />
     </div>
   );

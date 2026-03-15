@@ -10,6 +10,7 @@ import { Debts } from './pages/Debts';
 import { References } from './pages/References';
 import { Settings } from './pages/Settings';
 import { LockScreen } from './components/LockScreen';
+import { AppLockProvider } from './hooks/useAppLock';
 
 function App() {
   // Проверяем ?access_token= из Magic Link редиректа
@@ -52,7 +53,7 @@ function App() {
   }
 
   return (
-    <>
+    <AppLockProvider>
       <LockScreen />
       <BrowserRouter>
         <Routes>
@@ -69,7 +70,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-    </>
+    </AppLockProvider>
   );
 }
 
