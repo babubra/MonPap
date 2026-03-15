@@ -374,6 +374,7 @@ export function TransactionList({ type }: TransactionListProps) {
                       >
                         <div className="tx-item-left">
                           <span className={`tx-item-comment ${isExpanded ? 'tx-item-comment--full' : ''}`}>
+                            {tx.category_icon && <span className="tx-item-icon">{tx.category_icon}</span>}
                             {displayText}
                           </span>
                           {tx.category_name && tx.comment && (

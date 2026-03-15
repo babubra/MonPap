@@ -257,6 +257,9 @@ export function Debts() {
                             </>
                           )}
                         </span>
+                        {debt.comment && (
+                          <span className="debt-card-comment">{debt.comment}</span>
+                        )}
                       </div>
                       <div className="debt-card-amount">
                         <span className={`debt-card-amount-value amount ${debt.direction === 'gave' ? 'text-income' : 'text-expense'}`}>

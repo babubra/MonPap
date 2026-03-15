@@ -11,6 +11,7 @@ import './ReferenceSheet.css';
 export interface ReferenceItem {
   id: number;
   name: string;
+  icon?: string | null;
   ai_hint?: string | null;
   type?: string;     // для категорий: 'income' | 'expense'
   parent_id?: number | null; // для подкатегорий
@@ -75,9 +76,9 @@ export function ReferenceSheet({
   }
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange} modal={false}>
+    <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
-        <Drawer.Overlay onClick={() => onOpenChange(false)} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.5)' }} />
+        <Drawer.Overlay className="ref-sheet-overlay" />
         <Drawer.Content
           className="ref-sheet-drawer"
           style={{
@@ -156,7 +157,7 @@ export function ReferenceSheet({
                     style={item.parent_id && !search.trim() ? { paddingLeft: '32px', borderLeft: '2px solid var(--accent-color)' } : {}}
                   >
                     <div>
-                      <div className="ref-sheet-item-name">{item.name}</div>
+                      <div className="ref-sheet-item-name">{item.icon && <span style={{ marginRight: 6 }}>{item.icon}</span>}{item.name}</div>
                       {showHints && item.ai_hint && (
                         <div className="ref-sheet-item-hint">{item.ai_hint}</div>
                       )}

@@ -11,6 +11,7 @@ import {
   type Category,
   type Counterpart,
 } from '../api';
+import { EmojiPicker } from '../components/EmojiPicker';
 import './References.css';
 
 export function References() {
@@ -27,6 +28,8 @@ export function References() {
   const [catEditNames, setCatEditNames] = useState<Record<number, string>>({});
   const [catEditTypes, setCatEditTypes] = useState<Record<number, 'income' | 'expense'>>({});
   const [catEditParents, setCatEditParents] = useState<Record<number, number | null>>({});
+  const [catEditIcons, setCatEditIcons] = useState<Record<number, string>>({});
+  const [newCatIcon, setNewCatIcon] = useState<string>('');
 
   // Субъекты
   const [counterpartsList, setCounterpartsList] = useState<Counterpart[]>([]);
@@ -35,6 +38,8 @@ export function References() {
   const [expandedCpId, setExpandedCpId] = useState<number | null>(null);
   const [cpHints, setCpHints] = useState<Record<number, string>>({});
   const [cpEditNames, setCpEditNames] = useState<Record<number, string>>({});
+  const [cpEditIcons, setCpEditIcons] = useState<Record<number, string>>({});
+  const [newCpIcon, setNewCpIcon] = useState<string>('');
 
   const [loading, setLoading] = useState(true);
   const [savingHint, setSavingHint] = useState<number | null>(null);
@@ -56,25 +61,31 @@ export function References() {
       const cn: Record<number, string> = {};
       const ct: Record<number, 'income' | 'expense'> = {};
       const cp_parents: Record<number, number | null> = {};
+      const ci: Record<number, string> = {};
       cats.forEach((c) => {
         ch[c.id] = c.ai_hint || '';
         cn[c.id] = c.name;
         ct[c.id] = c.type as 'income' | 'expense';
         cp_parents[c.id] = c.parent_id || null;
+        ci[c.id] = c.icon || '';
       });
       setCatHints(ch);
       setCatEditNames(cn);
       setCatEditTypes(ct);
       setCatEditParents(cp_parents);
+      setCatEditIcons(ci);
 
       const cph: Record<number, string> = {};
       const cpn: Record<number, string> = {};
+      const cpi: Record<number, string> = {};
       cps.forEach((cp) => {
         cph[cp.id] = cp.ai_hint || '';
         cpn[cp.id] = cp.name;
+        cpi[cp.id] = cp.icon || '';
       });
       setCpHints(cph);
       setCpEditNames(cpn);
+      setCpEditIcons(cpi);
     } catch {
       // оффлайн
     } finally {
@@ -87,11 +98,12 @@ export function References() {
   async function addCategory() {
     if (!newCatName.trim()) return;
     try {
-      const created = await catApi.create({ name: newCatName.trim(), type: newCatType, parent_id: newCatParentId });
+      const created = await catApi.create({ name: newCatName.trim(), type: newCatType, parent_id: newCatParentId, icon: newCatIcon || undefined });
       setCategoriesList((prev) => [...prev, created]);
       setCatHints((prev) => ({ ...prev, [created.id]: '' }));
       setNewCatName('');
       setNewCatParentId(null);
+      setNewCatIcon('');
     } catch { /* ошибка */ }
   }
 
@@ -113,11 +125,13 @@ export function References() {
     if (!cat) return;
 
     // Собираем только изменённые поля
-    const patch: Partial<Pick<Category, 'name' | 'type' | 'parent_id'> & { ai_hint: string | undefined }> = {};
+    const patch: Partial<Pick<Category, 'name' | 'type' | 'parent_id' | 'icon'> & { ai_hint: string | undefined }> = {};
     if (editName && editName.trim() && editName.trim() !== cat.name) patch.name = editName.trim();
     if (editType && editType !== cat.type) patch.type = editType;
     if (editParentId !== cat.parent_id) patch.parent_id = editParentId;
     if (hint !== (cat.ai_hint || '')) patch.ai_hint = hint || undefined;
+    const editIcon = catEditIcons[id] ?? '';
+    if (editIcon !== (cat.icon || '')) patch.icon = editIcon || null;
 
     if (Object.keys(patch).length === 0) return; // нет изменений
 
@@ -125,12 +139,13 @@ export function References() {
     try {
       const updated = await catApi.update(id, patch);
       setCategoriesList((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, name: updated.name, type: updated.type, parent_id: updated.parent_id, ai_hint: updated.ai_hint } : c))
+        prev.map((c) => (c.id === id ? { ...c, name: updated.name, type: updated.type, parent_id: updated.parent_id, icon: updated.icon, ai_hint: updated.ai_hint } : c))
       );
       // Синхронизируем локальный стейт редактирования
       setCatEditNames((p) => ({ ...p, [id]: updated.name }));
       setCatEditTypes((p) => ({ ...p, [id]: updated.type as 'income' | 'expense' }));
       setCatEditParents((p) => ({ ...p, [id]: updated.parent_id }));
+      setCatEditIcons((p) => ({ ...p, [id]: updated.icon || '' }));
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -141,11 +156,12 @@ export function References() {
   async function addCounterpart() {
     if (!newCpName.trim()) return;
     try {
-      const created = await cpApi.create({ name: newCpName.trim() });
+      const created = await cpApi.create({ name: newCpName.trim(), icon: newCpIcon || undefined });
       setCounterpartsList((prev) => [...prev, created]);
       setCpHints((prev) => ({ ...prev, [created.id]: '' }));
       setCpEditNames((prev) => ({ ...prev, [created.id]: created.name }));
       setNewCpName('');
+      setNewCpIcon('');
     } catch { /* ошибка */ }
   }
 
@@ -164,9 +180,11 @@ export function References() {
     const cp = counterpartsList.find((c) => c.id === id);
     if (!cp) return;
 
-    const patch: Partial<Pick<Counterpart, 'name'> & { ai_hint: string | undefined }> = {};
+    const patch: Partial<Pick<Counterpart, 'name' | 'icon'> & { ai_hint: string | undefined }> = {};
     if (editName && editName.trim() && editName.trim() !== cp.name) patch.name = editName.trim();
     if (hint !== (cp.ai_hint || '')) patch.ai_hint = hint || undefined;
+    const editIcon = cpEditIcons[id] ?? '';
+    if (editIcon !== (cp.icon || '')) patch.icon = editIcon || null;
 
     if (Object.keys(patch).length === 0) return;
 
@@ -174,9 +192,10 @@ export function References() {
     try {
       const updated = await cpApi.update(id, patch);
       setCounterpartsList((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, name: updated.name, ai_hint: updated.ai_hint } : c))
+        prev.map((c) => (c.id === id ? { ...c, name: updated.name, icon: updated.icon, ai_hint: updated.ai_hint } : c))
       );
       setCpEditNames((p) => ({ ...p, [id]: updated.name }));
+      setCpEditIcons((p) => ({ ...p, [id]: updated.icon || '' }));
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -239,13 +258,21 @@ export function References() {
 
           {/* Добавить */}
           <div className="ref-mgmt-add-form-container" style={{ marginBottom: '12px', marginTop: 0 }}>
-            <input
-              className="input ref-mgmt-add-input"
-              placeholder="Новая категория..."
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <EmojiPicker
+                value={newCatIcon || null}
+                onChange={setNewCatIcon}
+                placeholder="😀"
+              />
+              <input
+                className="input ref-mgmt-add-input"
+                placeholder="Новая категория..."
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+                style={{ flex: 1 }}
+              />
+            </div>
             <div className="ref-mgmt-add-form-row">
               <select
                 className="input ref-mgmt-add-select"
@@ -309,7 +336,8 @@ export function References() {
                     const hintValue = catHints[cat.id] ?? '';
                     const editName = catEditNames[cat.id] ?? cat.name;
                     const editType = catEditTypes[cat.id] ?? cat.type;
-                    const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '');
+                    const editIcon = catEditIcons[cat.id] ?? (cat.icon || '');
+                    const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '') || editIcon !== (cat.icon || '');
                     return (
                       <div
                         key={cat.id}
@@ -322,6 +350,7 @@ export function References() {
                         <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
                             <span className="ref-mgmt-item-name">
+                              {cat.icon && <span className="ref-mgmt-item-icon">{cat.icon}</span>}
                               {cat.name}
                               {cat.ai_hint && <Sparkles size={12} className="ref-mgmt-ai-indicator" />}
                             </span>
@@ -336,6 +365,7 @@ export function References() {
                                 setCatEditNames((p) => ({ ...p, [cat.id]: cat.name }));
                                 setCatEditTypes((p) => ({ ...p, [cat.id]: cat.type as 'income' | 'expense' }));
                                 setCatEditParents((p) => ({ ...p, [cat.id]: cat.parent_id }));
+                                setCatEditIcons((p) => ({ ...p, [cat.id]: cat.icon || '' }));
                                 setExpandedCatId(isExpanded ? null : cat.id);
                               }}
                               aria-label="Редактировать"
@@ -349,16 +379,24 @@ export function References() {
                             <div
                               className="ref-mgmt-hint-section"
                             >
-                              {/* Название категории */}
+                              {/* Иконка + Название категории */}
                               <div className="ref-mgmt-edit-field">
                                 <label className="ref-mgmt-edit-label">Название</label>
-                                <input
-                                  className="input ref-mgmt-edit-input"
-                                  value={editName}
-                                  onChange={(e) => setCatEditNames((p) => ({ ...p, [cat.id]: e.target.value }))}
-                                  onKeyDown={(e) => e.key === 'Enter' && saveCategory(cat.id)}
-                                  placeholder="Название категории"
-                                />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <EmojiPicker
+                                    value={editIcon || null}
+                                    onChange={(emoji) => setCatEditIcons((p) => ({ ...p, [cat.id]: emoji }))}
+                                    placeholder="😀"
+                                  />
+                                  <input
+                                    className="input ref-mgmt-edit-input"
+                                    value={editName}
+                                    onChange={(e) => setCatEditNames((p) => ({ ...p, [cat.id]: e.target.value }))}
+                                    onKeyDown={(e) => e.key === 'Enter' && saveCategory(cat.id)}
+                                    placeholder="Название категории"
+                                    style={{ flex: 1 }}
+                                  />
+                                </div>
                               </div>
 
                               {/* Родительская категория */}
@@ -490,7 +528,7 @@ export function References() {
                     const isExpanded = expandedCpId === cp.id;
                     const hintValue = cpHints[cp.id] ?? '';
                     const editName = cpEditNames[cp.id] ?? cp.name;
-                    const hasChanges = editName.trim() !== cp.name || hintValue !== (cp.ai_hint || '');
+                    const hasChanges = editName.trim() !== cp.name || hintValue !== (cp.ai_hint || '') || (cpEditIcons[cp.id] ?? (cp.icon || '')) !== (cp.icon || '');
                     return (
                       <div
                         key={cp.id}
@@ -499,6 +537,7 @@ export function References() {
                         <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
                             <span className="ref-mgmt-item-name">
+                              {cp.icon && <span className="ref-mgmt-item-icon">{cp.icon}</span>}
                               {cp.name}
                               {cp.ai_hint && <Sparkles size={12} className="ref-mgmt-ai-indicator" />}
                             </span>
@@ -508,6 +547,7 @@ export function References() {
                               className="ref-mgmt-item-btn"
                               onClick={() => {
                                 setCpEditNames((p) => ({ ...p, [cp.id]: cp.name }));
+                                setCpEditIcons((p) => ({ ...p, [cp.id]: cp.icon || '' }));
                                 setExpandedCpId(isExpanded ? null : cp.id);
                               }}
                               aria-label="Редактировать"
@@ -521,16 +561,24 @@ export function References() {
                             <div
                               className="ref-mgmt-hint-section"
                             >
-                              {/* Имя субъекта */}
+                              {/* Иконка + Имя субъекта */}
                               <div className="ref-mgmt-edit-field">
                                 <label className="ref-mgmt-edit-label">Название</label>
-                                <input
-                                  className="input ref-mgmt-edit-input"
-                                  value={editName}
-                                  onChange={(e) => setCpEditNames((p) => ({ ...p, [cp.id]: e.target.value }))}
-                                  onKeyDown={(e) => e.key === 'Enter' && saveCounterpart(cp.id)}
-                                  placeholder="Имя субъекта"
-                                />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <EmojiPicker
+                                    value={cpEditIcons[cp.id] || null}
+                                    onChange={(emoji) => setCpEditIcons((p) => ({ ...p, [cp.id]: emoji }))}
+                                    placeholder="😊"
+                                  />
+                                  <input
+                                    className="input ref-mgmt-edit-input"
+                                    value={editName}
+                                    onChange={(e) => setCpEditNames((p) => ({ ...p, [cp.id]: e.target.value }))}
+                                    onKeyDown={(e) => e.key === 'Enter' && saveCounterpart(cp.id)}
+                                    placeholder="Имя субъекта"
+                                    style={{ flex: 1 }}
+                                  />
+                                </div>
                               </div>
 
                               {/* AI-подсказка */}
@@ -595,12 +643,18 @@ export function References() {
 
           {/* Добавить */}
           <div className="ref-mgmt-add-form">
+            <EmojiPicker
+              value={newCpIcon || null}
+              onChange={setNewCpIcon}
+              placeholder="😊"
+            />
             <input
               className="input"
               placeholder="Новый субъект..."
               value={newCpName}
               onChange={(e) => setNewCpName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCounterpart()}
+              style={{ flex: 1 }}
             />
             <button className="btn btn-primary btn-sm" onClick={addCounterpart} disabled={!newCpName.trim()}>
               <Plus size={14} />

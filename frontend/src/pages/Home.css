@@ -88,6 +88,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recent-item-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
 }
 
 .recent-item-meta {

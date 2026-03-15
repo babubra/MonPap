@@ -81,8 +81,10 @@ async def list_transactions(
                 data.category_name = f"{t.category.parent.name} / {t.category.name}"
             else:
                 data.category_name = t.category.name
+            data.category_icon = t.category.icon or (t.category.parent.icon if t.category.parent else None)
         else:
             data.category_name = None
+            data.category_icon = None
         response.append(data)
 
     return response
@@ -122,8 +124,10 @@ async def create_transaction(
             data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
         else:
             data.category_name = transaction.category.name
+        data.category_icon = transaction.category.icon or (transaction.category.parent.icon if transaction.category.parent else None)
     else:
         data.category_name = None
+        data.category_icon = None
     return data
 
 
@@ -159,8 +163,10 @@ async def update_transaction(
             data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
         else:
             data.category_name = transaction.category.name
+        data.category_icon = transaction.category.icon or (transaction.category.parent.icon if transaction.category.parent else None)
     else:
         data.category_name = None
+        data.category_icon = None
     return data
 
 

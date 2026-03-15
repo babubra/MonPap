@@ -75,6 +75,15 @@
   gap: 4px;
 }
 
+.debt-card-comment {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
 .debt-card-amount {
   text-align: right;
 }

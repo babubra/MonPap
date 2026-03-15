@@ -119,6 +119,7 @@
 
 .ref-mgmt-item--expanded {
   border-color: var(--border-focus);
+  overflow: visible;
 }
 
 /* Верхняя строка карточки */
@@ -175,7 +176,7 @@
   padding: 12px 16px 14px;
   border-top: 1px solid var(--border);
   background: var(--accent-subtle);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .ref-mgmt-hint-label {

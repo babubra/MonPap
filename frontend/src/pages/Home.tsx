@@ -284,6 +284,7 @@ export function Home() {
               >
                 <div className="recent-item-info">
                   <span className="recent-item-comment">
+                    {tx.category_icon && <span className="recent-item-icon">{tx.category_icon}</span>}
                     {tx.comment || tx.category_name || 'Без описания'}
                   </span>
                   <span className="recent-item-meta text-secondary">

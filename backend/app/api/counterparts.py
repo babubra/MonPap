@@ -36,6 +36,7 @@ async def create_counterpart(
     counterpart = Counterpart(
         user_id=user.id,
         name=body.name,
+        icon=body.icon,
         ai_hint=body.ai_hint,
     )
     db.add(counterpart)

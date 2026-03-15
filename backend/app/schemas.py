@@ -39,6 +39,7 @@ class CategoryCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     type: str = Field(..., pattern=r"^(income|expense)$")
     parent_id: int | None = None
+    icon: str | None = None
     ai_hint: str | None = None
 
 
@@ -46,6 +47,7 @@ class CategoryUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
     type: str | None = Field(None, pattern=r"^(income|expense)$")
     parent_id: int | None = None
+    icon: str | None = None
     ai_hint: str | None = None
 
 
@@ -54,6 +56,7 @@ class CategoryResponse(BaseModel):
     parent_id: int | None
     name: str
     type: str
+    icon: str | None
     ai_hint: str | None
     created_at: datetime
 
@@ -64,17 +67,20 @@ class CategoryResponse(BaseModel):
 
 class CounterpartCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
+    icon: str | None = None
     ai_hint: str | None = None
 
 
 class CounterpartUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
+    icon: str | None = None
     ai_hint: str | None = None
 
 
 class CounterpartResponse(BaseModel):
     id: int
     name: str
+    icon: str | None
     ai_hint: str | None
     created_at: datetime
 
@@ -107,6 +113,7 @@ class TransactionResponse(BaseModel):
     id: int
     category_id: int | None
     category_name: str | None = None
+    category_icon: str | None = None
     type: str
     amount: Decimal
     currency: str

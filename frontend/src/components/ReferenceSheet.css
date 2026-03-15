@@ -1,5 +1,12 @@
 /* ReferenceSheet.css */
 
+.ref-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 /* Фон панели — тема-aware */
 .ref-sheet-drawer {
   background: #161a3a; /* тёмная тема */

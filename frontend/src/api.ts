@@ -147,6 +147,7 @@ export interface Category {
   name: string;
   type: 'income' | 'expense';
   parent_id: number | null;
+  icon: string | null;
   ai_hint: string | null;
   created_at: string;
 }
@@ -155,7 +156,7 @@ export const categories = {
   list: (type?: string) =>
     request<Category[]>(`/categories${type ? `?type=${type}` : ''}`),
 
-  create: (data: { name: string; type: string; parent_id?: number | null; ai_hint?: string }) =>
+  create: (data: { name: string; type: string; parent_id?: number | null; icon?: string; ai_hint?: string }) =>
     mutateOffline<Category>('POST', '/categories', data, { id: -Date.now(), ...data, parent_id: data.parent_id || null, created_at: new Date().toISOString() }),
 
   update: (id: number, data: Partial<Category>) =>
@@ -170,6 +171,7 @@ export const categories = {
 export interface Counterpart {
   id: number;
   name: string;
+  icon: string | null;
   ai_hint: string | null;
   created_at: string;
 }
@@ -177,7 +179,7 @@ export interface Counterpart {
 export const counterparts = {
   list: () => request<Counterpart[]>('/counterparts'),
 
-  create: (data: { name: string; ai_hint?: string }) =>
+  create: (data: { name: string; icon?: string; ai_hint?: string }) =>
     mutateOffline<Counterpart>('POST', '/counterparts', data, { id: -Date.now(), ...data, created_at: new Date().toISOString() }),
 
   update: (id: number, data: Partial<Counterpart>) =>
@@ -193,6 +195,7 @@ export interface Transaction {
   id: number;
   category_id: number | null;
   category_name: string | null;
+  category_icon: string | null;
   type: 'income' | 'expense';
   amount: string;
   currency: string;
