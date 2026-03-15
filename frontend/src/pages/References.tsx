@@ -146,6 +146,8 @@ export function References() {
       setCatEditTypes((p) => ({ ...p, [id]: updated.type as 'income' | 'expense' }));
       setCatEditParents((p) => ({ ...p, [id]: updated.parent_id }));
       setCatEditIcons((p) => ({ ...p, [id]: updated.icon || '' }));
+      setCatHints((p) => ({ ...p, [id]: updated.ai_hint || '' }));
+      setExpandedCatId(null);
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -196,6 +198,8 @@ export function References() {
       );
       setCpEditNames((p) => ({ ...p, [id]: updated.name }));
       setCpEditIcons((p) => ({ ...p, [id]: updated.icon || '' }));
+      setCpHints((p) => ({ ...p, [id]: updated.ai_hint || '' }));
+      setExpandedCpId(null);
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
