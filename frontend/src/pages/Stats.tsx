@@ -16,7 +16,6 @@ import {
 import { ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
 import { stats as statsApi, type CategoryStatsItem, type StatsResponse } from '../api';
 import { useShowAmounts } from '../hooks/useShowAmounts';
-import { PullToRefresh } from '../components/PullToRefresh';
 import toast from 'react-hot-toast';
 import './Stats.css';
 
@@ -195,7 +194,6 @@ export function Stats() {
   const totalSum = Number(data?.total_sum || 0);
 
   return (
-    <PullToRefresh onRefresh={loadData}>
     <div className="page container">
       <div className="page-header">
         <h1 className="page-title">Статистика</h1>
@@ -361,6 +359,5 @@ export function Stats() {
         </>
       )}
     </div>
-    </PullToRefresh>
   );
 }

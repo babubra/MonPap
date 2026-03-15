@@ -13,7 +13,6 @@ import {
 import { ParsePreview, type ParsedData } from '../components/ParsePreview';
 import { TransactionDetailsSheet } from '../components/TransactionDetailsSheet';
 import { ManualTransactionSheet } from '../components/ManualTransactionSheet';
-import { PullToRefresh } from '../components/PullToRefresh';
 import './Home.css';
 
 export function Home() {
@@ -171,7 +170,6 @@ export function Home() {
   }
 
   return (
-    <PullToRefresh onRefresh={loadData}>
     <div className="page container">
       {/* Сводка */}
       <div
@@ -404,6 +402,5 @@ export function Home() {
         onSaved={loadData}
       />
     </div>
-    </PullToRefresh>
   );
 }

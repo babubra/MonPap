@@ -1,21 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { ArrowDownUp } from 'lucide-react';
 import { TransactionList } from '../components/TransactionList';
-import { PullToRefresh } from '../components/PullToRefresh';
 import './Transactions.css';
 
 type TabType = 'all' | 'income' | 'expense';
 
 export function Transactions() {
   const [tab, setTab] = useState<TabType>('all');
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const handleRefresh = useCallback(async () => {
-    setRefreshKey(k => k + 1);
-  }, []);
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
     <div className="page container">
       <div
         className="page-header"
@@ -48,8 +41,8 @@ export function Transactions() {
         </button>
       </div>
 
-      <TransactionList key={refreshKey} type={tab === 'all' ? undefined : tab} />
+      <TransactionList type={tab === 'all' ? undefined : tab} />
     </div>
-    </PullToRefresh>
   );
 }
+
