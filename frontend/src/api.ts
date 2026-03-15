@@ -2,7 +2,7 @@
  * MonPap — API-клиент (fetch wrapper) + Offline features
  */
 
-import { getCache, setCache, addPendingOp, setSettingsCache, getSettingsCache, clearDB } from './lib/offlineDb';
+import { addPendingOp, clearDB } from './lib/offlineDb';
 import toast from 'react-hot-toast';
 
 const API_BASE = '/api';
@@ -89,32 +89,7 @@ export class ApiError extends Error {
   }
 }
 
-// === Offline Helpers ===
-
-async function getWithCache<T>(path: string, storeName?: 'categories' | 'counterparts' | 'transactions' | 'debts' | 'settings', options?: RequestInit): Promise<T> {
-  if (navigator.onLine) {
-    try {
-      const data = await request<T>(path, options);
-      if (storeName) {
-        if (storeName === 'settings') {
-           await setSettingsCache(data);
-        } else if (Array.isArray(data)) {
-           await setCache(storeName, data);
-        }
-      }
-      return data;
-    } catch (e) {
-      if (!storeName) throw e;
-      console.warn('Network or API error, falling back to cache:', e);
-      if (storeName === 'settings') return (await getSettingsCache()) as T;
-      return (await getCache(storeName)) as T;
-    }
-  } else {
-    if (!storeName) throw new Error("Offline and no cache store specified");
-    if (storeName === 'settings') return (await getSettingsCache()) as T;
-    return (await getCache(storeName)) as T;
-  }
-}
+// === Offline Mutation Helper ===
 
 async function mutateOffline<T>(method: 'POST' | 'PUT' | 'DELETE', path: string, data?: unknown, mockResponse?: unknown): Promise<T> {
   if (navigator.onLine) {
@@ -178,7 +153,7 @@ export interface Category {
 
 export const categories = {
   list: (type?: string) =>
-    getWithCache<Category[]>(`/categories${type ? `?type=${type}` : ''}`, 'categories'),
+    request<Category[]>(`/categories${type ? `?type=${type}` : ''}`),
 
   create: (data: { name: string; type: string; parent_id?: number | null; ai_hint?: string }) =>
     mutateOffline<Category>('POST', '/categories', data, { id: -Date.now(), ...data, parent_id: data.parent_id || null, created_at: new Date().toISOString() }),
@@ -200,7 +175,7 @@ export interface Counterpart {
 }
 
 export const counterparts = {
-  list: () => getWithCache<Counterpart[]>('/counterparts', 'counterparts'),
+  list: () => request<Counterpart[]>('/counterparts'),
 
   create: (data: { name: string; ai_hint?: string }) =>
     mutateOffline<Counterpart>('POST', '/counterparts', data, { id: -Date.now(), ...data, created_at: new Date().toISOString() }),
@@ -255,21 +230,7 @@ export const transactions = {
       });
     }
     const qs = query.toString();
-    try {
-      return await getWithCache<Transaction[]>(`/transactions${qs ? `?${qs}` : ''}`, 'transactions');
-    } catch {
-      toast.error('Ошибка загрузки транзакций, показаны кэшированные данные');
-      // Offline fallback: fetch all cached and filter locally
-      const cached = await getCache('transactions') as Transaction[];
-      return cached.filter(t => {
-        if (params?.type && t.type !== params.type) return false;
-        if (params?.year && params?.month) {
-          const d = new Date(t.transaction_date);
-          if (d.getFullYear() !== params.year || d.getMonth() + 1 !== params.month) return false;
-        }
-        return true;
-      });
-    }
+    return request<Transaction[]>(`/transactions${qs ? `?${qs}` : ''}`);
   },
 
   create: (data: {
@@ -299,25 +260,6 @@ export const transactions = {
     if (year) query.set('year', String(year));
     if (month) query.set('month', String(month));
     const qs = query.toString();
-    // For summary, don't cache locally cleanly, just fail if offline, or calculate locally.
-    // We'll calculate locally if offline:
-    if (!navigator.onLine) {
-        const cached = await getCache('transactions') as Transaction[];
-        let total_income = 0;
-        let total_expense = 0;
-        cached.forEach(t => {
-            const d = new Date(t.transaction_date);
-            if (year && month && (d.getFullYear() !== year || d.getMonth() + 1 !== month)) return;
-            if (t.type === 'income') total_income += parseFloat(t.amount);
-            if (t.type === 'expense') total_expense += parseFloat(t.amount);
-        });
-        return {
-            month: `${year}-${String(month).padStart(2,'0')}-01`,
-            total_income: String(total_income),
-            total_expense: String(total_expense),
-            balance: String(total_income - total_expense)
-        } as TransactionSummary;
-    }
     return request<TransactionSummary>(`/transactions/summary${qs ? `?${qs}` : ''}`);
   },
 };
@@ -360,17 +302,7 @@ export const debts = {
       });
     }
     const qs = query.toString();
-    try {
-        return await getWithCache<Debt[]>(`/debts${qs ? `?${qs}` : ''}`, 'debts');
-    } catch {
-        toast.error('Ошибка загрузки долгов, показаны кэшированные данные');
-        const cached = await getCache('debts') as Debt[];
-        return cached.filter(d => {
-            if (params?.is_closed !== undefined && d.is_closed !== params.is_closed) return false;
-            if (params?.direction && d.direction !== params.direction) return false;
-            return true;
-        });
-    }
+    return request<Debt[]>(`/debts${qs ? `?${qs}` : ''}`);
   },
 
   create: (data: {
@@ -403,7 +335,7 @@ export interface UserSettings {
 }
 
 export const settings = {
-  get: () => getWithCache<UserSettings>('/settings', 'settings'),
+  get: () => request<UserSettings>('/settings'),
 
   update: (data: { custom_prompt?: string; theme?: string }) =>
     mutateOffline<UserSettings>('PUT', '/settings', data, { id: 1, ...data } as UserSettings),
