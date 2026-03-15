@@ -131,8 +131,11 @@
   border: none;
   cursor: pointer;
   color: var(--text-tertiary);
-  padding: 4px;
-  border-radius: var(--radius-sm);
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border-radius: var(--radius-full);
   transition: all var(--transition-fast);
   display: flex;
   align-items: center;
@@ -147,14 +150,13 @@
 .parse-field-check {
   color: white;
   background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  border-radius: var(--radius-full);
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  box-shadow: 0 2px 8px var(--accent-subtle);
 }
 
 .parse-field-check:hover {
   opacity: 0.9;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
 }
 
 /* Инлайн-редактирование */

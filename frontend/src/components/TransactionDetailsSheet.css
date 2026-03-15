@@ -170,11 +170,6 @@
   gap: 8px;
 }
 
-.tx-details-inline-edit-icon {
-  color: var(--text-tertiary);
-  opacity: 0.5;
-}
-
 /* Raw Text Bubble */
 .tx-details-raw-card {
   margin-top: 8px;
@@ -219,12 +214,35 @@
   background: var(--danger-subtle);
 }
 
-/* Inline check button */
-.btn-check {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+/* Единая кнопка inline-edit (карандаш / галочка) */
+.tx-inline-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   padding: 0;
   border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.tx-inline-btn:hover {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.tx-inline-btn--save {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+}
+
+.tx-inline-btn--save:hover {
+  opacity: 0.9;
+  color: white;
 }

@@ -440,6 +440,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="number"
                   value={data.amount || ''}
                   onChange={(e) => update({ amount: Number(e.target.value) })}
+                  onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
                   autoFocus
                 />
@@ -450,7 +451,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
               )}
             </div>
             {editingField === 'amount' ? (
-              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+              <button className="parse-field-edit parse-field-check" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingField(null)}>
                 <Check size={16} />
               </button>
             ) : (
@@ -543,6 +544,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="text"
                   value={data.comment}
                   onChange={(e) => update({ comment: e.target.value })}
+                  onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
                   autoFocus
                 />
@@ -553,7 +555,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
               )}
             </div>
             {editingField === 'comment' ? (
-              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+              <button className="parse-field-edit parse-field-check" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingField(null)}>
                 <Check size={16} />
               </button>
             ) : (
@@ -573,6 +575,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="date"
                   value={data.date}
                   onChange={(e) => update({ date: e.target.value })}
+                  onBlur={() => setEditingField(null)}
                   autoFocus
                 />
               ) : (
@@ -586,7 +589,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
               )}
             </div>
             {editingField === 'date' ? (
-              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+              <button className="parse-field-edit parse-field-check" onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingField(null)}>
                 <Check size={16} />
               </button>
             ) : (

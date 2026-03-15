@@ -147,10 +147,11 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                           className="tx-details-input-h1"
                           value={editAmount}
                           onChange={(e) => setEditAmount(e.target.value)}
+                          onBlur={() => { setEditAmount(transaction.amount); setEditingField(null); }}
                           onKeyDown={(e) => e.key === 'Enter' && handleSaveAmount()}
                           autoFocus
                         />
-                        <button className="btn btn-primary btn-icon" onClick={handleSaveAmount}>
+                        <button className="tx-inline-btn tx-inline-btn--save" onMouseDown={(e) => e.preventDefault()} onClick={handleSaveAmount}>
                           <Check size={18} />
                         </button>
                       </div>
@@ -195,6 +196,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                             className="input"
                             value={editDate}
                             onChange={(e) => setEditDate(e.target.value)}
+                            onBlur={() => { setEditDate(transaction.transaction_date.split('T')[0]); setEditingField(null); }}
                             onKeyDown={(e) => e.key === 'Enter' && handleSaveDate()}
                             autoFocus
                           />
@@ -207,11 +209,13 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                         )}
                       </div>
                       {editingField === 'date' ? (
-                        <button className="btn btn-primary btn-icon btn-check" onClick={handleSaveDate}>
+                        <button className="tx-inline-btn tx-inline-btn--save" onMouseDown={(e) => e.preventDefault()} onClick={handleSaveDate}>
                           <Check size={16} />
                         </button>
                       ) : (
-                        <Pencil size={14} className="tx-details-inline-edit-icon" onClick={() => setEditingField('date')} />
+                        <button className="tx-inline-btn" onClick={() => setEditingField('date')}>
+                          <Pencil size={16} />
+                        </button>
                       )}
                     </div>
 
@@ -228,6 +232,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                             className="input"
                             value={editComment}
                             onChange={(e) => setEditComment(e.target.value)}
+                            onBlur={() => { setEditComment(transaction.comment || ''); setEditingField(null); }}
                             onKeyDown={(e) => e.key === 'Enter' && handleSaveComment()}
                             autoFocus
                           />
@@ -238,11 +243,13 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                         )}
                       </div>
                       {editingField === 'comment' ? (
-                        <button className="btn btn-primary btn-icon btn-check" onClick={handleSaveComment}>
+                        <button className="tx-inline-btn tx-inline-btn--save" onMouseDown={(e) => e.preventDefault()} onClick={handleSaveComment}>
                           <Check size={16} />
                         </button>
                       ) : (
-                        <Pencil size={14} className="tx-details-inline-edit-icon" onClick={() => setEditingField('comment')} />
+                        <button className="tx-inline-btn" onClick={() => setEditingField('comment')}>
+                          <Pencil size={16} />
+                        </button>
                       )}
                     </div>
 
