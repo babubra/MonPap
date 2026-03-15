@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.models import Base
 from app.db.session import engine
-from app.api import auth, categories, counterparts, transactions, debts, settings, ai, sync
+from app.api import auth, categories, counterparts, transactions, debts, settings, ai, sync, stats
 
 
 @asynccontextmanager
@@ -51,6 +51,7 @@ app.include_router(debts.router)
 app.include_router(settings.router)
 app.include_router(ai.router)
 app.include_router(sync.router)
+app.include_router(stats.router)
 
 
 @app.get("/api/health")

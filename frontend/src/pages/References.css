@@ -55,3 +55,11 @@
   font-size: 18px;
   line-height: 1;
 }
+
+/* ── Форма добавления ─────────────────────────── */
+.ref-mgmt-add-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}

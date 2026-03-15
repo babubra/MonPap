@@ -207,3 +207,19 @@ class UserSettingsResponse(BaseModel):
     theme: str
 
     model_config = {"from_attributes": True}
+
+
+# ── Stats ────────────────────────────────────────────────────────
+
+class CategoryStats(BaseModel):
+    category_id: int | None
+    category_name: str
+    icon: str | None
+    total: Decimal
+
+
+class StatsResponse(BaseModel):
+    items: list[CategoryStats]
+    total_sum: Decimal
+    period_from: date
+    period_to: date

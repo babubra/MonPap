@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, ArrowDownUp, Landmark, BookMarked, Settings } from 'lucide-react';
+import { Home, ArrowDownUp, Landmark, BarChart3, Settings } from 'lucide-react';
 import { OfflineIndicator } from './OfflineIndicator';
 import './Layout.css';
 
@@ -7,7 +7,7 @@ const navItems = [
   { to: '/', icon: Home, label: 'Главная' },
   { to: '/transactions', icon: ArrowDownUp, label: 'Операции' },
   { to: '/debts', icon: Landmark, label: 'Долги' },
-  { to: '/references', icon: BookMarked, label: 'Данные' },
+  { to: '/stats', icon: BarChart3, label: 'Статистика' },
   { to: '/settings', icon: Settings, label: 'Настройки' },
 ];
 

@@ -4,7 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Moon, Sun, LogOut, MessageSquare, Shield, ScanFace } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Moon, Sun, LogOut, MessageSquare, Shield, ScanFace, BookMarked, ChevronRight } from 'lucide-react';
 import {
   settings as settingsApi,
   type UserSettings,
@@ -21,6 +22,7 @@ interface SettingsProps {
 }
 
 export function Settings({ onLogout }: SettingsProps) {
+  const navigate = useNavigate();
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -124,6 +126,21 @@ export function Settings({ onLogout }: SettingsProps) {
         className="page-header"
       >
         <h1 className="page-title">Настройки</h1>
+      </div>
+
+      {/* Справочники */}
+      <div className="settings-list" style={{ marginBottom: 16 }}>
+        <button
+          className="settings-item glass-card"
+          onClick={() => navigate('/references')}
+          style={{ cursor: 'pointer', width: '100%' }}
+        >
+          <div className="settings-item-info">
+            <BookMarked size={20} />
+            <span>Категории и субъекты</span>
+          </div>
+          <ChevronRight size={18} style={{ color: 'var(--text-tertiary)' }} />
+        </button>
       </div>
 
       {/* Тема */}

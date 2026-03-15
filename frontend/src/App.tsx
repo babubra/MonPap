@@ -10,6 +10,7 @@ import { Transactions } from './pages/Transactions';
 import { Debts } from './pages/Debts';
 import { References } from './pages/References';
 import { Settings } from './pages/Settings';
+import { Stats } from './pages/Stats';
 import { LockScreen } from './components/LockScreen';
 import { AppLockProvider } from './hooks/useAppLock';
 
@@ -62,6 +63,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/debts" element={<Debts />} />
+          <Route path="/stats" element={<Stats />} />
           <Route path="/references" element={<References />} />
           <Route path="/settings" element={<Settings onLogout={() => setAuthed(false)} />} />
           {/* Обратная совместимость со старыми URL */}

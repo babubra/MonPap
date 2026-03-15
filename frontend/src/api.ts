@@ -391,3 +391,26 @@ export const ai = {
     }); // Fails if offline
   },
 };
+
+// ── Stats ────────────────────────────────────────────────────
+
+export interface CategoryStatsItem {
+  category_id: number | null;
+  category_name: string;
+  icon: string | null;
+  total: string;
+}
+
+export interface StatsResponse {
+  items: CategoryStatsItem[];
+  total_sum: string;
+  period_from: string;
+  period_to: string;
+}
+
+export const stats = {
+  byCategory: (params: { type: string; date_from: string; date_to: string }) => {
+    const query = new URLSearchParams(params);
+    return request<StatsResponse>(`/stats/by-category?${query}`);
+  },
+};

@@ -646,10 +646,13 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
           onMouseDown={(e) => { if (e.target === e.currentTarget) setNewCatDialogOpen(false); }}
         >
           <div className="parse-card" style={{ gap: 0 }}>
-            <div className="parse-handle" />
-            <h3 className="parse-title">Новая категория</h3>
+            <div className="parse-header">
+              <div className="parse-handle" />
+              <h3 className="parse-title">Новая категория</h3>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
+            <div className="parse-body">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 16 }}>
               {/* Иконка + Название */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <EmojiPicker
@@ -718,6 +721,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   style={{ width: '100%' }}
                 />
               </div>
+            </div>
             </div>
 
             <div className="parse-actions">
