@@ -125,11 +125,11 @@ export function References() {
     if (!cat) return;
 
     // Собираем только изменённые поля
-    const patch: Partial<Pick<Category, 'name' | 'type' | 'parent_id' | 'icon'> & { ai_hint: string | undefined }> = {};
+    const patch: Partial<Pick<Category, 'name' | 'type' | 'parent_id' | 'icon'> & { ai_hint: string | null }> = {};
     if (editName && editName.trim() && editName.trim() !== cat.name) patch.name = editName.trim();
     if (editType && editType !== cat.type) patch.type = editType;
     if (editParentId !== cat.parent_id) patch.parent_id = editParentId;
-    if (hint !== (cat.ai_hint || '')) patch.ai_hint = hint || undefined;
+    if (hint !== (cat.ai_hint || '')) patch.ai_hint = hint || null;
     const editIcon = catEditIcons[id] ?? '';
     if (editIcon !== (cat.icon || '')) patch.icon = editIcon || null;
 
@@ -182,9 +182,9 @@ export function References() {
     const cp = counterpartsList.find((c) => c.id === id);
     if (!cp) return;
 
-    const patch: Partial<Pick<Counterpart, 'name' | 'icon'> & { ai_hint: string | undefined }> = {};
+    const patch: Partial<Pick<Counterpart, 'name' | 'icon'> & { ai_hint: string | null }> = {};
     if (editName && editName.trim() && editName.trim() !== cp.name) patch.name = editName.trim();
-    if (hint !== (cp.ai_hint || '')) patch.ai_hint = hint || undefined;
+    if (hint !== (cp.ai_hint || '')) patch.ai_hint = hint || null;
     const editIcon = cpEditIcons[id] ?? '';
     if (editIcon !== (cp.icon || '')) patch.icon = editIcon || null;
 
