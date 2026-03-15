@@ -356,6 +356,9 @@ export interface AiParseResult {
   category_id?: number;
   category_name?: string;
   category_is_new?: boolean;
+  category_icon?: string;
+  category_parent_name?: string;
+  category_parent_id?: number;
   counterpart_id?: number;
   counterpart_name?: string;
   counterpart_is_new?: boolean;

@@ -344,6 +344,15 @@
   background: var(--danger-subtle);
 }
 
+.ref-mgmt-item-btn--close {
+  color: var(--text-secondary);
+}
+
+.ref-mgmt-item-btn--close:hover {
+  color: var(--danger) !important;
+  background: var(--danger-subtle) !important;
+}
+
 /* Форма создания */
 .ref-mgmt-add-form-container {
   display: flex;

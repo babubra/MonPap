@@ -114,9 +114,14 @@ async def create_transaction(
     )
     db.add(transaction)
     await db.flush()
-    await db.refresh(transaction, attribute_names=["category", "created_at", "updated_at"])
 
-    await db.refresh(transaction, attribute_names=["category", "created_at", "updated_at"])
+    # Перезагружаем с eager-загрузкой category и category.parent
+    result = await db.execute(
+        select(Transaction)
+        .options(joinedload(Transaction.category).joinedload(Category.parent))
+        .where(Transaction.id == transaction.id)
+    )
+    transaction = result.unique().scalar_one()
 
     data = TransactionResponse.model_validate(transaction)
     if transaction.category:

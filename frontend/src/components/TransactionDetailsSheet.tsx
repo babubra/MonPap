@@ -22,6 +22,7 @@ interface TransactionDetailsSheetProps {
 
 export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpdated, onDeleted }: TransactionDetailsSheetProps) {
   const [editingField, setEditingField] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const { formatAmount } = useShowAmounts();
   
   // Local state for edits
@@ -40,6 +41,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
       setEditComment(transaction.comment || '');
       setEditDate(transaction.transaction_date.split('T')[0]);
       setEditingField(null);
+      setConfirmDelete(false);
     }
   }, [transaction, open]);
 
@@ -251,10 +253,21 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                   </div>
 
                   <div className="tx-details-actions">
-                    <button className="btn btn-secondary tx-details-delete" onClick={handleDelete}>
-                      <Trash2 size={16} />
-                      Удалить запись
-                    </button>
+                    {confirmDelete ? (
+                      <>
+                        <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
+                          Отмена
+                        </button>
+                        <button className="btn btn-danger-outline" onClick={handleDelete}>
+                          <Trash2 size={16} /> Да, удалить
+                        </button>
+                      </>
+                    ) : (
+                      <button className="btn btn-secondary tx-details-delete" onClick={() => setConfirmDelete(true)}>
+                        <Trash2 size={16} />
+                        Удалить запись
+                      </button>
+                    )}
                   </div>
 
                 </div>

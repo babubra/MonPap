@@ -6,14 +6,16 @@ import { useState, useEffect, useCallback } from 'react';
 
 import {
   Landmark, ArrowUpRight, ArrowDownLeft,
-  ChevronDown, ChevronUp, Plus, Trash2, Search, Pencil,
+  ChevronDown, ChevronUp, Plus, Trash2, Search, Pencil, X,
 } from 'lucide-react';
 import { debts as debtsApi, counterparts as cpApi, type Debt, type DebtPayment, type Counterpart } from '../api';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import { DebtPaymentSheet } from '../components/DebtPaymentSheet';
 import { DebtEditForm } from '../components/DebtEditForm';
+import { Drawer } from 'vaul';
 import toast from 'react-hot-toast';
 import './Debts.css';
+import '../components/TransactionDetailsSheet.css';
 
 /** Группирует долги по дате. */
 function groupDebtsByDate(items: Debt[]): { date: string; label: string; items: Debt[] }[] {
@@ -127,9 +129,7 @@ export function Debts() {
     }
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-  }
+
 
   function getProgress(debt: Debt): number {
     const amount = Number(debt.amount);
@@ -302,19 +302,8 @@ export function Debts() {
                     {isExpanded && (
                       <div className="debt-payments" onClick={(e) => e.stopPropagation()}>
 
-                        {/* Форма редактирования */}
-                        {editingId === debt.id ? (
-                          <DebtEditForm
-                            debt={debt}
-                            counterpartsList={counterpartsList}
-                            onCancel={cancelEdit}
-                            onSaved={() => {
-                              setEditingId(null);
-                              loadData();
-                            }}
-                          />
-                        ) : (
-                          <>
+                        {/* Форма редактирования убрана в Bottom Sheet — открывается кнопкой ✏️ */}
+                        <>
                             <div className="debt-payments-title">История платежей</div>
 
                             {debt.payments.length === 0 ? (
@@ -387,9 +376,8 @@ export function Debts() {
                               )}
                             </div>
                           </>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
                   </div>
                 );
               })}
@@ -404,6 +392,39 @@ export function Debts() {
         onOpenChange={(open) => !open && setPayDebtId(null)}
         onSaved={loadData}
       />
+
+      {/* Bottom Sheet: редактирование долга */}
+      <Drawer.Root
+        open={editingId !== null}
+        onOpenChange={(open) => { if (!open) setEditingId(null); }}
+      >
+        <Drawer.Portal>
+          <Drawer.Overlay className="vaul-overlay" />
+          <Drawer.Content className="vaul-content glass">
+            <div className="vaul-handle" />
+            <div className="vaul-body">
+              <div className="tx-details-header">
+                <span className="tx-details-type">Редактировать долг</span>
+                <button className="btn btn-ghost btn-icon" onClick={() => setEditingId(null)}>
+                  <X size={20} />
+                </button>
+              </div>
+              {editingId !== null && (() => {
+                const debt = [...activeDebts, ...closedDebts].find(d => d.id === editingId);
+                if (!debt) return null;
+                return (
+                  <DebtEditForm
+                    debt={debt}
+                    counterpartsList={counterpartsList}
+                    onCancel={() => setEditingId(null)}
+                    onSaved={() => { setEditingId(null); loadData(); }}
+                  />
+                );
+              })()}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
     </div>
   );
 }

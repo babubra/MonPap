@@ -86,9 +86,77 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
   const [activeDebts, setActiveDebts] = useState<Debt[]>([]);
   const [debtsLoading, setDebtsLoading] = useState(false);
 
+  // Предупреждение о дубликате
+  const [duplicateWarning, setDuplicateWarning] = useState<{
+    existingCat: Category;
+    newName: string;
+    newParentName: string | null;
+  } | null>(null);
+
   // Загрузка справочников
   useEffect(() => {
-    catApi.list().then(setCategories).catch((e) => toast.error(e.message || 'Ошибка загрузки категорий'));
+    catApi.list().then((cats) => {
+      setCategories(cats);
+      // Умная обработка category_is_new
+      if (result.category_is_new && result.category_name) {
+        const aiName = result.category_name.toLowerCase();
+        const aiParentName = result.category_parent_name?.toLowerCase() || null;
+
+        // Ищем точное совпадение (имя + parent)
+        const exactMatch = cats.find((c) => {
+          const nameMatch = c.name.toLowerCase() === aiName;
+          if (!nameMatch) return false;
+          if (aiParentName) {
+            const parent = cats.find((p) => p.id === c.parent_id);
+            return parent?.name.toLowerCase() === aiParentName;
+          }
+          return !c.parent_id; // Без parent — совпадает как "основная"
+        });
+
+        if (exactMatch) {
+          // Точное совпадение — подставляем существующую
+          setData((prev) => ({
+            ...prev,
+            category_id: exactMatch.id,
+            category_name: exactMatch.name,
+          }));
+          return;
+        }
+
+        // Ищем совпадение по имени (но с другим parent)
+        const nameMatch = cats.find((c) => c.name.toLowerCase() === aiName);
+        if (nameMatch) {
+          setDuplicateWarning({
+            existingCat: nameMatch,
+            newName: result.category_name,
+            newParentName: result.category_parent_name || null,
+          });
+          // Пока подставляем существующую, пользователь решит
+          setData((prev) => ({
+            ...prev,
+            category_id: nameMatch.id,
+            category_name: nameMatch.name,
+          }));
+          return;
+        }
+
+        // Нет совпадений — подготавливаем диалог создания
+        setNewCatName(result.category_name);
+        setNewCatIcon(result.category_icon || '');
+        setNewCatHint('');
+        // Ищем parent по имени
+        if (aiParentName) {
+          const parentCat = cats.find(
+            (c) => c.name.toLowerCase() === aiParentName && !c.parent_id
+          );
+          setNewCatParentId(parentCat?.id || null);
+        } else {
+          setNewCatParentId(null);
+        }
+        // Автоматически открываем диалог создания
+        setTimeout(() => setNewCatDialogOpen(true), 300);
+      }
+    }).catch((e) => toast.error(e.message || 'Ошибка загрузки категорий'));
     cpApi.list().then(setCounterpartsItems).catch((e) => toast.error(e.message || 'Ошибка загрузки контрагентов'));
   }, []);
 
@@ -246,6 +314,49 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
               {data.counterpart_name
                 ? `У «${data.counterpart_name}» нет активных долгов`
                 : 'Нет активных долгов. Добавьте долг сначала.'}
+            </div>
+          </div>
+        )}
+
+        {/* Предупреждение о дубликате категории */}
+        {duplicateWarning && (
+          <div className="parse-warning" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <AlertTriangle size={18} />
+              <div>
+                Категория «{duplicateWarning.newName}» уже существует
+                {(() => {
+                  const parent = categories.find(c => c.id === duplicateWarning.existingCat.parent_id);
+                  return parent ? ` в «${parent.name}»` : ' (основная)';
+                })()}
+                {duplicateWarning.newParentName && `. Вы просили создать в «${duplicateWarning.newParentName}».`}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginLeft: 26 }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setDuplicateWarning(null)}
+              >
+                Использовать существующую
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setDuplicateWarning(null);
+                  setNewCatName(duplicateWarning.newName);
+                  setNewCatIcon(result.category_icon || '');
+                  setNewCatHint('');
+                  if (duplicateWarning.newParentName) {
+                    const parentCat = categories.find(
+                      (c) => c.name.toLowerCase() === duplicateWarning.newParentName!.toLowerCase() && !c.parent_id
+                    );
+                    setNewCatParentId(parentCat?.id || null);
+                  }
+                  setNewCatDialogOpen(true);
+                }}
+              >
+                Создать новую
+              </button>
             </div>
           </div>
         )}
