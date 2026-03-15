@@ -1,0 +1,40 @@
+.debt-edit-form {
+  background: var(--bg-input);
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+}
+
+.debt-edit-form-title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.debt-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.debt-edit-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.debt-edit-input {
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+}
+
+.debt-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
@@ -46,22 +45,14 @@ export function ConfirmDialog({
   }, [open, onCancel]);
 
   return (
-    <AnimatePresence>
+    <>
       {open && (
-        <motion.div
+        <div
           className="confirm-dialog-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
           onClick={onCancel}
         >
-          <motion.div
+          <div
             className="confirm-dialog glass-card"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={(e) => e.stopPropagation()}
           >
             {title && <div className="confirm-dialog-title">{title}</div>}
@@ -81,9 +72,9 @@ export function ConfirmDialog({
                 {confirmText}
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

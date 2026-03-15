@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import './PinSetupSheet.css';
 
 interface PinSetupSheetProps {
@@ -63,20 +62,12 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
   const title = step === 'enter' ? 'Введите новый PIN-код' : 'Повторите PIN-код';
 
   return (
-    <AnimatePresence>
-      <motion.div
+      <div
         className="pin-setup-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
         onClick={() => { reset(); onClose(); }}
       >
-        <motion.div
+        <div
           className="pin-setup-sheet"
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           onClick={e => e.stopPropagation()}
         >
           <div className="pin-setup-handle" />
@@ -120,8 +111,7 @@ export function PinSetupSheet({ open, onClose, onConfirm }: PinSetupSheetProps) 
           >
             Отмена
           </button>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
   );
 }

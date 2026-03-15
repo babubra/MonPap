@@ -17,6 +17,7 @@ import {
   type Counterpart,
   type Debt,
 } from '../api';
+import toast from 'react-hot-toast';
 import { ReferenceSheet, type ReferenceItem } from './ReferenceSheet';
 import './ParsePreview.css';
 
@@ -78,8 +79,8 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
 
   // Загрузка справочников
   useEffect(() => {
-    catApi.list().then(setCategories).catch(() => {});
-    cpApi.list().then(setCounterpartsItems).catch(() => {});
+    catApi.list().then(setCategories).catch((e) => toast.error(e.message || 'Ошибка загрузки категорий'));
+    cpApi.list().then(setCounterpartsItems).catch((e) => toast.error(e.message || 'Ошибка загрузки контрагентов'));
   }, []);
 
   // При типе debt_payment — загружаем активные долги
@@ -100,7 +101,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
           setData((prev) => ({ ...prev, debt_id: matched[0].id }));
         }
       })
-      .catch(() => {})
+      .catch((e) => toast.error(e.message || 'Ошибка загрузки долгов'))
       .finally(() => setDebtsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.type, data.counterpart_id]);
@@ -124,7 +125,8 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
       const created = await catApi.create({ name, type: catType });
       setCategories((prev) => [...prev, created]);
       return created;
-    } catch {
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка создания категории');
       return null;
     }
   }
@@ -134,7 +136,8 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
       const created = await cpApi.create({ name });
       setCounterpartsItems((prev) => [...prev, created]);
       return created;
-    } catch {
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка создания контрагента');
       return null;
     }
   }

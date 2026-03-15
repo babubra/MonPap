@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Mail, ArrowRight, Loader2, KeyRound } from 'lucide-react';
 import { auth, setToken } from '../api';
 import './Login.css';
@@ -106,11 +105,8 @@ export function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="login-page">
-      <motion.div
+      <div
         className="login-card glass"
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         {/* Лого */}
         <div className="login-logo">
@@ -124,10 +120,8 @@ export function Login({ onLogin }: LoginProps) {
         </div>
 
         {sent ? (
-          <motion.div
+          <div
             className="login-sent"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
           >
             <KeyRound size={36} className="login-sent-icon" />
             <h2>Введите код</h2>
@@ -155,13 +149,11 @@ export function Login({ onLogin }: LoginProps) {
             </div>
 
             {error && (
-              <motion.p
+              <p
                 className="login-error"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
               >
                 {error}
-              </motion.p>
+              </p>
             )}
 
             {pinLoading && (
@@ -181,7 +173,7 @@ export function Login({ onLogin }: LoginProps) {
             >
               Другой email
             </button>
-          </motion.div>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-input-group">
@@ -200,13 +192,11 @@ export function Login({ onLogin }: LoginProps) {
             </div>
 
             {error && (
-              <motion.p
+              <p
                 className="login-error"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
               >
                 {error}
-              </motion.p>
+              </p>
             )}
 
             <button
@@ -225,7 +215,7 @@ export function Login({ onLogin }: LoginProps) {
             </button>
           </form>
         )}
-      </motion.div>
+      </div>
 
       {/* Фоновый градиент */}
       <div className="login-bg-glow" />

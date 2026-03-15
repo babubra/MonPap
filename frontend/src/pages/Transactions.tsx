@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowDownUp } from 'lucide-react';
 import { TransactionList } from '../components/TransactionList';
 import './Transactions.css';
@@ -11,16 +10,14 @@ export function Transactions() {
 
   return (
     <div className="page container">
-      <motion.div
+      <div
         className="page-header"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="page-title">
           <ArrowDownUp size={24} style={{ color: 'var(--accent)', verticalAlign: 'middle', marginRight: 8 }} />
           Операции
         </h1>
-      </motion.div>
+      </div>
 
       {/* Табы */}
       <div className="tx-tabs">

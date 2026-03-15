@@ -1,22 +1,18 @@
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Send, Mic, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
+import { Eye, EyeOff, Send, Mic, Loader, PlusCircle, AlertTriangle, X as XIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useShowAmounts } from '../hooks/useShowAmounts';
+import { useTransactionMutations } from '../hooks/useTransactionMutations';
+import toast from 'react-hot-toast';
 import {
   transactions as txApi,
-  categories as catApi,
-  counterparts as cpApi,
-  debts as debtsApi,
   ai,
   type TransactionSummary,
   type Transaction,
   type AiParseResult,
-  type Category,
 } from '../api';
 import { ParsePreview, type ParsedData } from '../components/ParsePreview';
 import { TransactionDetailsSheet } from '../components/TransactionDetailsSheet';
-import { ReferenceSheet, type ReferenceItem } from '../components/ReferenceSheet';
-import { Drawer } from 'vaul';
+import { ManualTransactionSheet } from '../components/ManualTransactionSheet';
 import './Home.css';
 
 export function Home() {
@@ -25,25 +21,19 @@ export function Home() {
   const { showAmounts, toggleShowAmounts, formatAmount } = useShowAmounts();
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   // Ручная транзакция
   const [manualOpen, setManualOpen] = useState(false);
-  const [mType, setMType] = useState<'income' | 'expense'>('expense');
-  const [mAmount, setMAmount] = useState('');
-  const [mComment, setMComment] = useState('');
-  const [mDate, setMDate] = useState(new Date().toISOString().split('T')[0]);
-  const [mCatId, setMCatId] = useState<number | null>(null);
-  const [mCatName, setMCatName] = useState('');
-  const [mCatSheet, setMCatSheet] = useState(false);
-  const [mSaving, setMSaving] = useState(false);
-  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
 
   // AI parse
   const [parsing, setParsing] = useState(false);
   const [parseResult, setParseResult] = useState<AiParseResult | null>(null);
   const [parseRawText, setParseRawText] = useState('');
   const [parseError, setParseError] = useState('');
+  const [isErrorExpanded, setIsErrorExpanded] = useState(false);
+  const { saveParsedTransaction } = useTransactionMutations();
 
   // Аудио
   const [recording, setRecording] = useState(false);
@@ -52,7 +42,6 @@ export function Home() {
 
   useEffect(() => {
     loadData();
-    catApi.list().then(setCategoriesList).catch(() => {});
   }, []);
 
   async function loadData() {
@@ -63,50 +52,14 @@ export function Home() {
       ]);
       setSummary(s);
       setRecent(r);
-    } catch {
-      // Оффлайн
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка загрузки данных');
     } finally {
       setLoading(false);
+      setIsInitialLoad(false);
     }
   }
-
-  // Ручное добавление транзакции
-  const filteredCatsForManual = categoriesList.filter((c) => c.type === mType);
-
-  async function saveManualTx() {
-    if (!mAmount) return;
-    setMSaving(true);
-    try {
-      await txApi.create({
-        type: mType,
-        amount: Number(mAmount),
-        transaction_date: mDate,
-        category_id: mCatId || undefined,
-        comment: mComment || undefined,
-      });
-      setManualOpen(false);
-      setMAmount('');
-      setMComment('');
-      setMCatId(null);
-      setMCatName('');
-      loadData();
-    } catch {
-      // ошибка
-    } finally {
-      setMSaving(false);
-    }
-  }
-
-  async function handleCreateCatInSheet(name: string): Promise<ReferenceItem | null> {
-    try {
-      const created = await catApi.create({ name, type: mType });
-      setCategoriesList((prev) => [...prev, created]);
-      return created;
-    } catch {
-      return null;
-    }
-  }
-
+  // (Методы сохранения Category/Counterpart для ParsePreview остаются)
 
   // ── Отправка текста на AI ──────────────────────
   async function handleSendText() {
@@ -115,6 +68,7 @@ export function Home() {
 
     setParsing(true);
     setParseError('');
+    setIsErrorExpanded(false);
     try {
       const result = await ai.parse(text);
       setParseResult(result);
@@ -146,6 +100,7 @@ export function Home() {
 
         setParsing(true);
         setParseError('');
+        setIsErrorExpanded(false);
         try {
           const result = await ai.parseAudio(blob);
           setParseResult(result);
@@ -186,59 +141,15 @@ export function Home() {
 
   // ── Сохранение из ParsePreview ────────────────
   async function handleSave(data: ParsedData) {
-    // ── Авто-создание нового субъекта если AI распознал нового ──
-    let counterpartId = data.counterpart_id;
-    if (!counterpartId && data.counterpart_name) {
-      try {
-        const created = await cpApi.create({ name: data.counterpart_name });
-        counterpartId = created.id;
-      } catch {
-        // Субъект не создался — сохраняем без него
-      }
+    try {
+      await saveParsedTransaction(data);
+      setParseResult(null);
+      // Обновляем данные
+      loadData();
+      toast.success('Сохранено');
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка сохранения');
     }
-
-    // ── Авто-создание новой категории если AI распознал новую ──
-    let categoryId = data.category_id;
-    if (!categoryId && data.category_name && (data.type === 'income' || data.type === 'expense')) {
-      try {
-        const created = await catApi.create({ name: data.category_name, type: data.type });
-        categoryId = created.id;
-      } catch {
-        // Категория не создалась — сохраняем без неё
-      }
-    }
-
-    if (data.type === 'income' || data.type === 'expense') {
-      await txApi.create({
-        type: data.type,
-        amount: data.amount,
-        transaction_date: data.date,
-        category_id: categoryId || undefined,
-        comment: data.raw_text || data.comment || undefined,
-        raw_text: data.raw_text || undefined,
-        currency: data.currency,
-      });
-    } else if (data.type === 'debt_give' || data.type === 'debt_take') {
-      await debtsApi.create({
-        direction: data.type === 'debt_give' ? 'gave' : 'took',
-        amount: data.amount,
-        debt_date: data.date,
-        counterpart_id: counterpartId || undefined,
-        comment: data.raw_text || data.comment || undefined,
-        currency: data.currency,
-      });
-    } else if (data.type === 'debt_payment') {
-      if (!data.debt_id) throw new Error('Не выбран долг для оплаты');
-      await debtsApi.addPayment(data.debt_id, {
-        amount: data.amount,
-        payment_date: data.date,
-        comment: data.raw_text || data.comment || undefined,
-      });
-    }
-
-    setParseResult(null);
-    // Обновляем данные
-    loadData();
   }
 
   function handleUpdatedTx(updatedTx: Transaction) {
@@ -255,11 +166,8 @@ export function Home() {
   return (
     <div className="page container">
       {/* Сводка */}
-      <motion.div
+      <div
         className="summary-card glass"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
       >
         <div className="summary-header">
           <div>
@@ -300,7 +208,7 @@ export function Home() {
             {loading ? '...' : `${formatAmount(summary?.balance || '0')} ₽`}
           </span>
         </div>
-      </motion.div>
+      </div>
 
       {/* Ошибка парсинга */}
       {parseError && (() => {
@@ -321,50 +229,50 @@ export function Home() {
           detail = 'Временная ошибка сервера. Попробуйте через несколько секунд.';
         }
         return (
-          <motion.div
+          <div
             className="parse-toast parse-toast--rich"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            onClick={() => setIsErrorExpanded(!isErrorExpanded)}
+            style={{ cursor: 'pointer' }}
           >
             <AlertTriangle size={16} className="parse-toast-icon" />
             <div className="parse-toast-body">
               <span className="parse-toast-title">{title}</span>
               <span className="parse-toast-detail">{detail}</span>
+              {isErrorExpanded && (
+                <div style={{ marginTop: 8, fontSize: '13px', opacity: 0.8, backgroundColor: 'rgba(0,0,0,0.15)', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  {parseError}
+                </div>
+              )}
             </div>
-            <button className="parse-toast-close" onClick={() => setParseError('')}>
+            <button className="parse-toast-close" onClick={(e) => { e.stopPropagation(); setParseError(''); setIsErrorExpanded(false); }}>
               <XIcon size={14} />
             </button>
-          </motion.div>
+          </div>
         );
       })()}
 
       {/* Последние транзакции */}
       <div className="recent-section">
         <h3 className="section-title">Последние операции</h3>
-        {loading ? (
+        {isInitialLoad ? (
           <div className="skeleton-list">
             {[1,2,3].map(i => (
               <div key={i} className="skeleton" style={{ height: 56, marginBottom: 8 }} />
             ))}
           </div>
         ) : recent.length === 0 ? (
-          <motion.div
+          <div
             className="empty-state"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
           >
             <p>Пока нет операций</p>
             <p className="text-secondary">Введите текст ниже для создания</p>
-          </motion.div>
+          </div>
         ) : (
-          <div className="recent-list">
-            {recent.map((tx, i) => (
-              <motion.div
+          <div className="recent-list" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out' }}>
+            {recent.map((tx) => (
+              <div
                 key={tx.id}
                 className="recent-item glass-card"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
                 style={{ cursor: 'pointer' }}
                 onClick={() => setSelectedTx(tx)}
               >
@@ -380,7 +288,7 @@ export function Home() {
                 <span className={`recent-item-amount amount ${tx.type === 'income' ? 'text-income' : 'text-expense'}`}>
                   {tx.type === 'income' ? '+' : '-'}{formatAmount(tx.amount)} ₽
                 </span>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
@@ -481,117 +389,10 @@ export function Home() {
         onDeleted={handleDeletedTx}
       />
 
-      {/* Drawer: Ручная транзакция */}
-      <Drawer.Root open={manualOpen} onOpenChange={setManualOpen}>
-        <Drawer.Portal>
-          <Drawer.Overlay style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
-          <Drawer.Content
-            style={{
-              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-              background: 'var(--bg-secondary)',
-              borderTopLeftRadius: 'var(--radius-xl)',
-              borderTopRightRadius: 'var(--radius-xl)',
-            }}
-          >
-            <div className="manual-tx-content">
-              <div className="manual-tx-handle" />
-              <Drawer.Title className="manual-tx-title">Новая транзакция</Drawer.Title>
-
-              <div className="manual-tx-fields">
-                {/* Тип */}
-                <div>
-                  <label className="manual-tx-label">Тип</label>
-                  <div className="manual-tx-type-row">
-                    <button
-                      className={`manual-tx-type-btn ${mType === 'expense' ? 'active' : ''}`}
-                      onClick={() => { setMType('expense'); setMCatId(null); setMCatName(''); }}
-                    >
-                      Расход
-                    </button>
-                    <button
-                      className={`manual-tx-type-btn ${mType === 'income' ? 'active' : ''}`}
-                      onClick={() => { setMType('income'); setMCatId(null); setMCatName(''); }}
-                    >
-                      Доход
-                    </button>
-                  </div>
-                </div>
-
-                {/* Сумма */}
-                <div>
-                  <label className="manual-tx-label">Сумма</label>
-                  <input
-                    className="input"
-                    type="number"
-                    placeholder="0"
-                    value={mAmount}
-                    onChange={(e) => setMAmount(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-
-                {/* Категория */}
-                <div>
-                  <label className="manual-tx-label">Категория</label>
-                  <button className="manual-tx-cat-picker" onClick={() => setMCatSheet(true)}>
-                    {mCatName ? (
-                      <span>{mCatName}</span>
-                    ) : (
-                      <span className="text-muted">Выберите категорию...</span>
-                    )}
-                    <ChevronRight size={14} style={{ marginLeft: 'auto', color: 'var(--text-tertiary)' }} />
-                  </button>
-                </div>
-
-                {/* Комментарий */}
-                <div>
-                  <label className="manual-tx-label">Комментарий</label>
-                  <input
-                    className="input"
-                    type="text"
-                    placeholder="Необязательно"
-                    value={mComment}
-                    onChange={(e) => setMComment(e.target.value)}
-                  />
-                </div>
-
-                {/* Дата */}
-                <div>
-                  <label className="manual-tx-label">Дата</label>
-                  <input
-                    className="input"
-                    type="date"
-                    value={mDate}
-                    onChange={(e) => setMDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="parse-actions">
-                <button className="btn btn-secondary" onClick={() => setManualOpen(false)}>
-                  Отмена
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={saveManualTx}
-                  disabled={!mAmount || mSaving}
-                >
-                  {mSaving ? 'Сохраняю...' : 'Сохранить'}
-                </button>
-              </div>
-            </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
-
-      <ReferenceSheet
-        open={mCatSheet}
-        onOpenChange={setMCatSheet}
-        title="Выберите категорию"
-        items={filteredCatsForManual}
-        selectedId={mCatId}
-        onSelect={(item) => { setMCatId(item.id); setMCatName(item.name); }}
-        onCreate={handleCreateCatInSheet}
+      <ManualTransactionSheet
+        open={manualOpen}
+        onOpenChange={setManualOpen}
+        onSaved={loadData}
       />
     </div>
   );

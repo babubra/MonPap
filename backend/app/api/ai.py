@@ -61,7 +61,7 @@ async def _call_gemini(system: str, user_prompt: str) -> dict:
 
         genai.configure(api_key=settings.GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.1-flash-lite-preview",
             system_instruction=system,
         )
 
@@ -167,7 +167,7 @@ async def parse_audio(
 
         # Модель с системным промтом
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.1-flash-lite-preview",
             system_instruction=SYSTEM_PROMPT,
         )
 

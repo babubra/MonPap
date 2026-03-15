@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { usePendingOps } from '../hooks/usePendingOps';
 import './OfflineIndicator.css';
@@ -22,14 +21,10 @@ export function OfflineIndicator() {
   const isVisible = (!isOnline) || (pendingCount > 0) || showBanner;
 
   return (
-    <AnimatePresence>
+    <>
       {isVisible && (
-        <motion.div
+        <div
            className={`offline-banner ${isOnline ? (pendingCount > 0 ? 'offline-banner--syncing' : 'offline-banner--online') : 'offline-banner--offline'}`}
-           initial={{ y: -50, opacity: 0 }}
-           animate={{ y: 0, opacity: 1 }}
-           exit={{ y: -50, opacity: 0 }}
-           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         >
           {!isOnline && (
             <>
@@ -51,8 +46,8 @@ export function OfflineIndicator() {
               <span>Подключение восстановлено</span>
             </>
           )}
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

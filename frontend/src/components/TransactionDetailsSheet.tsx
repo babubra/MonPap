@@ -7,6 +7,7 @@ import {
   type Transaction, 
   type Category 
 } from '../api';
+import toast from 'react-hot-toast';
 import { ReferenceSheet, type ReferenceItem } from './ReferenceSheet';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import './TransactionDetailsSheet.css';
@@ -44,7 +45,9 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
 
   useEffect(() => {
     if (open && transaction?.type !== undefined) {
-      catApi.list().then(setCategories).catch(() => {});
+      catApi.list().then(setCategories).catch((e: any) => {
+        toast.error(e.message || 'Ошибка загрузки категорий');
+      });
     }
   }, [open, transaction?.type]);
 
@@ -75,7 +78,8 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
       setCategories((prev) => [...prev, created]);
       await handleCategorySelect(created);
       return created;
-    } catch {
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка создания категории');
       return null;
     }
   }
@@ -86,10 +90,12 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
       const updatedTx = await txApi.update(transaction.id, data);
       onUpdated(updatedTx);
       setEditingField(null);
-    } catch {
+      toast.success('Транзакция обновлена');
+    } catch (e: any) {
       // Offline mode handles failures transparently
       onUpdated({ ...transaction, ...data } as Transaction);
       setEditingField(null);
+      toast.error(e.message || 'Ошибка обновления транзакции');
     }
   }
 
@@ -99,9 +105,11 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
       await txApi.delete(transaction.id);
       onDeleted(transaction.id);
       onOpenChange(false);
-    } catch {
-      onDeleted(transaction.id);
+      toast.success('Транзакция удалена');
+    } catch (e: any) {
+      onDeleted(transaction.id); // Still delete locally in offline mode
       onOpenChange(false);
+      toast.error(e.message || 'Ошибка удаления транзакции');
     }
   }
 

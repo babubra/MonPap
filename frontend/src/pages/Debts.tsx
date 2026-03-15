@@ -3,14 +3,16 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Drawer } from 'vaul';
+
 import {
   Landmark, ArrowUpRight, ArrowDownLeft,
-  ChevronDown, ChevronUp, Plus, Trash2, Search, Pencil, Check, X,
+  ChevronDown, ChevronUp, Plus, Trash2, Search, Pencil,
 } from 'lucide-react';
 import { debts as debtsApi, counterparts as cpApi, type Debt, type DebtPayment, type Counterpart } from '../api';
 import { useShowAmounts } from '../hooks/useShowAmounts';
+import { DebtPaymentSheet } from '../components/DebtPaymentSheet';
+import { DebtEditForm } from '../components/DebtEditForm';
+import toast from 'react-hot-toast';
 import './Debts.css';
 
 /** Группирует долги по дате. */
@@ -57,20 +59,11 @@ export function Debts() {
   const { formatAmount } = useShowAmounts();
   const [counterpartsList, setCounterpartsList] = useState<Counterpart[]>([]);
 
-  // Форма платежа
+  // Форма платежа (ссылка на ID для открытия Drawer)
   const [payDebtId, setPayDebtId] = useState<number | null>(null);
-  const [payAmount, setPayAmount] = useState('');
-  const [payComment, setPayComment] = useState('');
-  const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
-  const [paySaving, setPaySaving] = useState(false);
 
   // Редактирование долга
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editAmount, setEditAmount] = useState('');
-  const [editDate, setEditDate] = useState('');
-  const [editComment, setEditComment] = useState('');
-  const [editCounterpartId, setEditCounterpartId] = useState<number | ''>('');
-  const [editSaving, setEditSaving] = useState(false);
   const [confirmDeleteDebtId, setConfirmDeleteDebtId] = useState<number | null>(null);
 
   const loadData = useCallback(async () => {
@@ -84,8 +77,8 @@ export function Debts() {
       setActiveDebts(active);
       setClosedDebts(closed);
       setCounterpartsList(cps);
-    } catch {
-      // оффлайн
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка загрузки долгов');
     } finally {
       setLoading(false);
     }
@@ -112,25 +105,7 @@ export function Debts() {
     .filter((d) => d.direction === 'took')
     .reduce((s, d) => s + Number(d.amount) - Number(d.paid_amount), 0);
 
-  async function handleAddPayment() {
-    if (!payDebtId || !payAmount) return;
-    setPaySaving(true);
-    try {
-      await debtsApi.addPayment(payDebtId, {
-        amount: Number(payAmount),
-        payment_date: payDate,
-        comment: payComment || undefined,
-      });
-      setPayDebtId(null);
-      setPayAmount('');
-      setPayComment('');
-      loadData();
-    } catch {
-      // ошибка
-    } finally {
-      setPaySaving(false);
-    }
-  }
+
 
   async function handleDelete(id: number) {
     try {
@@ -138,39 +113,14 @@ export function Debts() {
       if (expandedId === id) setExpandedId(null);
       setConfirmDeleteDebtId(null);
       loadData();
-    } catch {
-      // ошибка
+      toast.success('Долг удален');
+    } catch (e: any) {
+      toast.error(e.message || 'Не удалось удалить долг');
     }
-  }
-
-  function startEdit(debt: Debt) {
-    setEditingId(debt.id);
-    setEditAmount(String(debt.amount));
-    setEditDate(debt.debt_date.split('T')[0]);
-    setEditComment(debt.comment || '');
-    setEditCounterpartId(debt.counterpart_id ?? '');
   }
 
   function cancelEdit() {
     setEditingId(null);
-  }
-
-  async function handleSaveEdit(id: number) {
-    setEditSaving(true);
-    try {
-      await debtsApi.update(id, {
-        amount: String(editAmount) as unknown as Debt['amount'],
-        debt_date: editDate,
-        comment: editComment || undefined,
-        counterpart_id: editCounterpartId !== '' ? Number(editCounterpartId) : null,
-      } as Partial<Debt>);
-      setEditingId(null);
-      loadData();
-    } catch {
-      // ошибка
-    } finally {
-      setEditSaving(false);
-    }
   }
 
   function getProgress(debt: Debt): number {
@@ -182,16 +132,14 @@ export function Debts() {
 
   return (
     <div className="page container">
-      <motion.div
+      <div
         className="page-header"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="page-title">
           <Landmark size={24} style={{ color: 'var(--accent)', verticalAlign: 'middle', marginRight: 8 }} />
           Долги
         </h1>
-      </motion.div>
+      </div>
 
       {/* Сводка */}
       {!loading && activeDebts.length > 0 && (
@@ -258,38 +206,30 @@ export function Debts() {
           ))}
         </div>
       ) : currentList.length === 0 ? (
-        <motion.div
+        <div
           className="empty-state"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
         >
           <Landmark size={48} style={{ color: 'var(--accent)', marginBottom: 12 }} />
           <p>{tab === 'active' ? 'Активных долгов нет' : 'Закрытых долгов нет'}</p>
           <p className="text-secondary">Добавьте на главной странице</p>
-        </motion.div>
+        </div>
       ) : (
-        <AnimatePresence>
+        <>
           {groupDebtsByDate(currentList).map(({ date, label, items: group }) => (
-            <motion.div
+            <div
               key={date}
               className="tx-group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
             >
               <div className="tx-date-header">{label}</div>
 
-              {group.map((debt, i) => {
+              {group.map((debt) => {
                 const progress = getProgress(debt);
                 const isExpanded = expandedId === debt.id;
 
                 return (
-                  <motion.div
+                  <div
                     key={debt.id}
                     className="debt-card glass-card"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -40 }}
-                    transition={{ delay: i * 0.04 }}
                   >
                     <div className="debt-card-header">
                       <div className="debt-card-info">
@@ -353,66 +293,15 @@ export function Debts() {
 
                         {/* Форма редактирования */}
                         {editingId === debt.id ? (
-                          <div className="debt-edit-form">
-                            <div className="debt-edit-form-title">
-                              <Pencil size={13} /> Редактировать долг
-                            </div>
-                            <div className="debt-edit-fields">
-                              <div>
-                                <label className="debt-edit-label">Сумма</label>
-                                <input
-                                  className="input debt-edit-input"
-                                  type="number"
-                                  value={editAmount}
-                                  onChange={(e) => setEditAmount(e.target.value)}
-                                />
-                              </div>
-                              <div>
-                                <label className="debt-edit-label">Дата</label>
-                                <input
-                                  className="input debt-edit-input"
-                                  type="date"
-                                  value={editDate}
-                                  onChange={(e) => setEditDate(e.target.value)}
-                                />
-                              </div>
-                              <div>
-                                <label className="debt-edit-label">Субъект</label>
-                                <select
-                                  className="input debt-edit-input"
-                                  value={editCounterpartId}
-                                  onChange={(e) => setEditCounterpartId(e.target.value === '' ? '' : Number(e.target.value))}
-                                >
-                                  <option value="">— без субъекта —</option>
-                                  {counterpartsList.map((cp) => (
-                                    <option key={cp.id} value={cp.id}>{cp.name}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="debt-edit-label">Комментарий</label>
-                                <input
-                                  className="input debt-edit-input"
-                                  type="text"
-                                  placeholder="Необязательно"
-                                  value={editComment}
-                                  onChange={(e) => setEditComment(e.target.value)}
-                                />
-                              </div>
-                            </div>
-                            <div className="debt-edit-actions">
-                              <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
-                                <X size={13} /> Отмена
-                              </button>
-                              <button
-                                className="btn btn-primary btn-sm"
-                                onClick={() => handleSaveEdit(debt.id)}
-                                disabled={editSaving || !editAmount || !editDate}
-                              >
-                                {editSaving ? 'Сохранение...' : <><Check size={13} /> Сохранить</>}
-                              </button>
-                            </div>
-                          </div>
+                          <DebtEditForm
+                            debt={debt}
+                            counterpartsList={counterpartsList}
+                            onCancel={cancelEdit}
+                            onSaved={() => {
+                              setEditingId(null);
+                              loadData();
+                            }}
+                          />
                         ) : (
                           <>
                             <div className="debt-payments-title">История платежей</div>
@@ -454,7 +343,7 @@ export function Debts() {
                               )}
                               <button
                                 className="btn btn-secondary btn-sm debt-edit-icon-btn"
-                                onClick={() => startEdit(debt)}
+                                onClick={() => setEditingId(debt.id)}
                                 title="Изменить долг"
                               >
                                 <Pencil size={15} />
@@ -490,79 +379,20 @@ export function Debts() {
                         )}
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
-            </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
+        </>
       )}
 
-      {/* Drawer для добавления платежа */}
-      <Drawer.Root open={payDebtId !== null} onOpenChange={(open) => !open && setPayDebtId(null)}>
-        <Drawer.Portal>
-          <Drawer.Overlay style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
-          <Drawer.Content
-            style={{
-              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-              background: 'var(--bg-secondary)',
-              borderTopLeftRadius: 'var(--radius-xl)',
-              borderTopRightRadius: 'var(--radius-xl)',
-            }}
-          >
-            <div className="payment-form">
-              <div className="ref-sheet-handle" />
-              <Drawer.Title className="payment-form-title">Добавить платёж</Drawer.Title>
-
-              <div className="payment-form-fields">
-                <div>
-                  <label className="payment-form-label">Сумма</label>
-                  <input
-                    className="input"
-                    type="number"
-                    placeholder="0"
-                    value={payAmount}
-                    onChange={(e) => setPayAmount(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-                <div>
-                  <label className="payment-form-label">Дата</label>
-                  <input
-                    className="input"
-                    type="date"
-                    value={payDate}
-                    onChange={(e) => setPayDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="payment-form-label">Комментарий</label>
-                  <input
-                    className="input"
-                    type="text"
-                    placeholder="Необязательно"
-                    value={payComment}
-                    onChange={(e) => setPayComment(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="parse-actions">
-                <button className="btn btn-secondary" onClick={() => setPayDebtId(null)}>
-                  Отмена
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleAddPayment}
-                  disabled={!payAmount || paySaving}
-                >
-                  {paySaving ? 'Сохраняю...' : 'Сохранить'}
-                </button>
-              </div>
-            </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+      <DebtPaymentSheet
+        debtId={payDebtId}
+        open={payDebtId !== null}
+        onOpenChange={(open) => !open && setPayDebtId(null)}
+        onSaved={loadData}
+      />
     </div>
   );
 }

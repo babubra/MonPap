@@ -3,13 +3,13 @@
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
-from app.db.models import Category, Counterpart, Debt, DebtPayment, Transaction, User
+from app.db.models import Category, Counterpart, Debt, Transaction, User
 from app.db.session import get_db
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])

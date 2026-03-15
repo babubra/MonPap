@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Tag, Users, Trash2, Plus, Sparkles, Check, Search, Pencil } from 'lucide-react';
 import {
   categories as catApi,
@@ -186,13 +185,11 @@ export function References() {
 
   return (
     <div className="page container">
-      <motion.div
+      <div
         className="page-header"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="page-title">Справочники</h1>
-      </motion.div>
+      </div>
 
       {/* Табы */}
       <div className="ref-tabs">
@@ -214,10 +211,8 @@ export function References() {
 
       {/* ── Вкладка: Категории ─────────────────────────────────── */}
       {tab === 'categories' && (
-        <motion.div
+        <div
           key="categories"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
         >
           {/* Поиск */}
           <div className="ref-search">
@@ -246,10 +241,9 @@ export function References() {
                     const editType = catEditTypes[cat.id] ?? cat.type;
                     const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '');
                     return (
-                      <motion.div
+                      <div
                         key={cat.id}
                         className={`ref-mgmt-item ${isExpanded ? 'ref-mgmt-item--expanded' : ''}`}
-                        layout
                       >
                         <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
@@ -276,14 +270,9 @@ export function References() {
                           </div>
                         </div>
 
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
+                        {isExpanded && (
+                            <div
                               className="ref-mgmt-hint-section"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.2 }}
                             >
                               {/* Название категории */}
                               <div className="ref-mgmt-edit-field">
@@ -369,10 +358,9 @@ export function References() {
                                   </>
                                 )}
                               </div>
-                            </motion.div>
+                            </div>
                           )}
-                        </AnimatePresence>
-                      </motion.div>
+                      </div>
                     );
                   })}
 
@@ -400,15 +388,13 @@ export function References() {
               <Plus size={14} />
             </button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* ── Вкладка: Субъекты ──────────────────────────────────── */}
       {tab === 'counterparts' && (
-        <motion.div
+        <div
           key="counterparts"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
         >
           {/* Поиск */}
           <div className="ref-search">
@@ -436,10 +422,9 @@ export function References() {
                     const editName = cpEditNames[cp.id] ?? cp.name;
                     const hasChanges = editName.trim() !== cp.name || hintValue !== (cp.ai_hint || '');
                     return (
-                      <motion.div
+                      <div
                         key={cp.id}
                         className={`ref-mgmt-item ${isExpanded ? 'ref-mgmt-item--expanded' : ''}`}
-                        layout
                       >
                         <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
@@ -462,14 +447,9 @@ export function References() {
                           </div>
                         </div>
 
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
+                        {isExpanded && (
+                            <div
                               className="ref-mgmt-hint-section"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.2 }}
                             >
                               {/* Имя субъекта */}
                               <div className="ref-mgmt-edit-field">
@@ -536,10 +516,9 @@ export function References() {
                                   </>
                                 )}
                               </div>
-                            </motion.div>
+                            </div>
                           )}
-                        </AnimatePresence>
-                      </motion.div>
+                      </div>
                     );
                   })}
           </div>
@@ -557,7 +536,7 @@ export function References() {
               <Plus size={14} />
             </button>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

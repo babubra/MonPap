@@ -3,6 +3,7 @@
  */
 
 import { getCache, setCache, addPendingOp, setSettingsCache, getSettingsCache } from './lib/offlineDb';
+import toast from 'react-hot-toast';
 
 const API_BASE = '/api';
 
@@ -108,6 +109,9 @@ async function getWithCache<T>(path: string, storeName?: 'categories' | 'counter
          if (storeName === 'settings') return (await getSettingsCache()) as T;
          return (await getCache(storeName)) as T;
       }
+      if (e instanceof ApiError) {
+         toast.error(e.message);
+      }
       throw e;
     }
   } else {
@@ -128,6 +132,9 @@ async function mutateOffline<T>(method: 'POST' | 'PUT' | 'DELETE', path: string,
       if (e instanceof TypeError) { // Network error
          await addPendingOp({ method, endpoint: path, payload: data });
          return mockResponse as T;
+      }
+      if (e instanceof ApiError) {
+         toast.error(e.message);
       }
       throw e;
     }
@@ -252,6 +259,7 @@ export const transactions = {
     try {
       return await getWithCache<Transaction[]>(`/transactions${qs ? `?${qs}` : ''}`, 'transactions');
     } catch {
+      toast.error('Ошибка загрузки транзакций, показаны кэшированные данные');
       // Offline fallback: fetch all cached and filter locally
       const cached = await getCache('transactions') as Transaction[];
       return cached.filter(t => {
@@ -356,6 +364,7 @@ export const debts = {
     try {
         return await getWithCache<Debt[]>(`/debts${qs ? `?${qs}` : ''}`, 'debts');
     } catch {
+        toast.error('Ошибка загрузки долгов, показаны кэшированные данные');
         const cached = await getCache('debts') as Debt[];
         return cached.filter(d => {
             if (params?.is_closed !== undefined && d.is_closed !== params.is_closed) return false;

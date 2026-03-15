@@ -11,7 +11,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucide-react';
 import { transactions as txApi, categories as catApi, type Transaction, type Category } from '../api';
 import { TransactionDetailsSheet } from './TransactionDetailsSheet';
@@ -95,6 +94,7 @@ interface TransactionListProps {
 export function TransactionList({ type }: TransactionListProps) {
   const [items, setItems] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [expandedTxId, setExpandedTxId] = useState<number | null>(null);
@@ -135,6 +135,7 @@ export function TransactionList({ type }: TransactionListProps) {
       // оффлайн
     } finally {
       setLoading(false);
+      setIsInitialLoad(false);
     }
   }, [type, periodMode, year, month, rangeFrom, rangeTo, selectedCatId, search]);
 
@@ -313,8 +314,8 @@ export function TransactionList({ type }: TransactionListProps) {
       </div>
 
       {/* Итого — только для Доходов и Расходов, не для общего списка */}
-      {!loading && items.length > 0 && !!type && (
-        <div className="tx-total">
+      {items.length > 0 && !!type && (
+        <div className="tx-total" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out' }}>
           <span>
             {items.length} записей
             {selectedCat && <span className="tx-total-cat"> · {selectedCat.name}</span>}
@@ -326,42 +327,40 @@ export function TransactionList({ type }: TransactionListProps) {
       )}
 
 
-      {loading ? (
+      {isInitialLoad ? (
         <div className="skeleton-list">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="skeleton" style={{ height: 44, marginBottom: 4 }} />
           ))}
         </div>
-      ) : items.length === 0 ? (
-        <motion.div className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      ) : items.length === 0 && !loading ? (
+        <div className="empty-state">
           <p>{search || selectedCatId ? 'Ничего не найдено' : 'Нет записей за этот период'}</p>
           <p className="text-secondary">Добавьте на главной странице</p>
-        </motion.div>
+        </div>
+      ) : items.length === 0 && loading ? (
+        <div className="skeleton-list">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton" style={{ height: 44, marginBottom: 4 }} />
+          ))}
+        </div>
       ) : (
-        <>
-          <AnimatePresence>
+        <div style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out', flex: 1 }}>
             {groupByDate(items).map(({ date, label, items: group }) => (
-              <motion.div
+              <div
                 key={date}
                 className="tx-group"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
               >
                 <div className="tx-date-header">{label}</div>
                 <div className="tx-list">
-                  {group.map((tx, i) => {
+                  {group.map((tx) => {
                     const isExpanded = expandedTxId === tx.id;
                     const displayText = tx.comment || tx.category_name || 'Без описания';
 
                     return (
-                      <motion.div
+                      <div
                         key={tx.id}
                         className={`tx-item glass-card ${isExpanded ? 'tx-item--expanded' : ''}`}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -40 }}
-                        transition={{ delay: i * 0.02 }}
-                        layout
                         onClick={() => handleTxClick(tx)}
                       >
                         <div className="tx-item-left">
@@ -381,15 +380,13 @@ export function TransactionList({ type }: TransactionListProps) {
                           {tx.type === 'income' ? '+' : '-'}
                           {formatAmount(tx.amount)} ₽
                         </span>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
-
-          </>
+        </div>
       )}
 
       <TransactionDetailsSheet

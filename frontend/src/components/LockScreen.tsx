@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Delete, ScanFace } from 'lucide-react';
 import { useAppLock } from '../hooks/useAppLock';
 import './LockScreen.css';
@@ -50,11 +49,8 @@ export function LockScreen() {
   if (!isLocked) return null;
 
   return (
-    <motion.div 
+    <div 
       className="lock-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
     >
       <div className="lock-screen-header">
         <h1 className="lock-app-name">MonPap</h1>
@@ -94,6 +90,6 @@ export function LockScreen() {
           <Delete size={24} />
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

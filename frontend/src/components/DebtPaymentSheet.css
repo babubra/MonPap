@@ -1,0 +1,28 @@
+.payment-form {
+  padding: 16px;
+  padding-bottom: calc(var(--safe-area-bottom) + 16px);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.payment-form-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.payment-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.payment-form-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 6px;
+}

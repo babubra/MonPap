@@ -4,13 +4,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Moon, Sun, LogOut, MessageSquare, Shield, ScanFace } from 'lucide-react';
 import {
   settings as settingsApi,
   type UserSettings,
   setToken,
 } from '../api';
+import toast from 'react-hot-toast';
 import { useAppLock } from '../hooks/useAppLock';
 import { PinSetupSheet } from '../components/PinSetupSheet';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -44,8 +44,8 @@ export function Settings({ onLogout }: SettingsProps) {
       setUserSettings(s);
       setCustomPrompt(s.custom_prompt || '');
       document.documentElement.setAttribute('data-theme', s.theme);
-    } catch {
-      // оффлайн
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка загрузки настроек');
     } finally {
       setLoading(false);
     }
@@ -53,14 +53,19 @@ export function Settings({ onLogout }: SettingsProps) {
 
   // ── Тема ──────────────────────────────────
   async function toggleTheme() {
-    const newTheme = userSettings?.theme === 'dark' ? 'light' : 'dark';
+    const currentTheme = userSettings?.theme;
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('monpap_theme', newTheme);
     try {
       const updated = await settingsApi.update({ theme: newTheme });
       setUserSettings(updated);
-    } catch {
-      // оффлайн
+      toast.success('Тема изменена');
+    } catch (e: any) {
+      // откатываем если ошибка на сервере
+      document.documentElement.setAttribute('data-theme', currentTheme || 'light'); // Revert to original theme
+      localStorage.setItem('monpap_theme', currentTheme || 'light');
+      toast.error(e.message || 'Не удалось сменить тему');
     }
   }
 
@@ -71,8 +76,9 @@ export function Settings({ onLogout }: SettingsProps) {
       const updated = await settingsApi.update({ custom_prompt: customPrompt });
       setUserSettings(updated);
       setPromptDirty(false);
-    } catch {
-      // ошибка
+      toast.success('Промт сохранен');
+    } catch (e: any) {
+      toast.error(e.message || 'Ошибка сохранения промта');
     } finally {
       setPromptSaving(false);
     }
@@ -114,21 +120,16 @@ export function Settings({ onLogout }: SettingsProps) {
 
   return (
     <div className="page container">
-      <motion.div
+      <div
         className="page-header"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
       >
         <h1 className="page-title">Настройки</h1>
-      </motion.div>
+      </div>
 
       {/* Тема */}
       <div className="settings-list">
-        <motion.div
+        <div
           className="settings-item glass-card"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
         >
           <div className="settings-item-info">
             {userSettings?.theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
@@ -144,7 +145,7 @@ export function Settings({ onLogout }: SettingsProps) {
               <div className="theme-toggle-thumb" />
             </div>
           </button>
-        </motion.div>
+        </div>
       </div>
 
       {/* Кастомный промт */}
@@ -195,7 +196,7 @@ export function Settings({ onLogout }: SettingsProps) {
         </div>
         
         <div className="settings-list">
-          <motion.div className="settings-item glass-card" style={{ marginBottom: 8 }}>
+          <div className="settings-item glass-card" style={{ marginBottom: 8 }}>
             <div className="settings-item-info">
               <span>Защита PIN-кодом</span>
             </div>
@@ -209,20 +210,20 @@ export function Settings({ onLogout }: SettingsProps) {
                 <div className="theme-toggle-thumb" />
               </div>
             </button>
-          </motion.div>
+          </div>
 
           {isEnabled && (
-            <motion.button
+            <button
               className="settings-item glass-card"
               onClick={lockNow}
               style={{ marginBottom: isSupported ? 8 : 0, justifyContent: 'center' }}
             >
               <span style={{ color: 'var(--accent)', fontWeight: 500 }}>Заблокировать сейчас</span>
-            </motion.button>
+            </button>
           )}
 
           {isEnabled && isSupported && (
-            <motion.div className="settings-item glass-card">
+            <div className="settings-item glass-card">
               <div className="settings-item-info">
                 <ScanFace size={20} />
                 <span>Вход по Face ID / Отпечатку</span>
@@ -234,26 +235,23 @@ export function Settings({ onLogout }: SettingsProps) {
                   Подключить
                 </button>
               )}
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
 
       {/* Выход */}
       <div className="settings-section">
-        <motion.button
+        <button
           className="settings-item glass-card settings-logout"
           onClick={handleLogout}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
           style={{ borderRadius: 'var(--radius-md)' }}
         >
           <div className="settings-item-info">
             <LogOut size={20} />
             <span>Выйти из аккаунта</span>
           </div>
-        </motion.button>
+        </button>
       </div>
 
       <PinSetupSheet
