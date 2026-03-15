@@ -58,7 +58,10 @@ async def stats_by_category(
     cat_map: dict[int, Category] = {}
     if cat_ids:
         cats_result = await db.execute(
-            select(Category).where(Category.id.in_(cat_ids))
+            select(Category).where(
+                Category.id.in_(cat_ids),
+                Category.user_id == user.id,  # ← только свои категории
+            )
         )
         for cat in cats_result.scalars().all():
             cat_map[cat.id] = cat
