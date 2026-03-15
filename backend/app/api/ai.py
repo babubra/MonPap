@@ -26,10 +26,15 @@ async def _get_user_context(user: User, db: AsyncSession) -> dict:
     result = await db.execute(
         select(Category).where(Category.user_id == user.id)
     )
-    categories = [
-        {"id": c.id, "name": c.name, "type": c.type, "ai_hint": c.ai_hint}
-        for c in result.scalars().all()
-    ]
+    categories_data = result.scalars().all()
+    categories_dict = {c.id: c for c in categories_data}
+    
+    categories = []
+    for c in categories_data:
+        name = c.name
+        if c.parent_id and c.parent_id in categories_dict:
+            name = f"{categories_dict[c.parent_id].name} / {name}"
+        categories.append({"id": c.id, "name": name, "type": c.type, "ai_hint": c.ai_hint})
 
     # Субъекты
     result = await db.execute(

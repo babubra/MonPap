@@ -2,7 +2,7 @@
  * MonPap — API-клиент (fetch wrapper) + Offline features
  */
 
-import { getCache, setCache, addPendingOp, setSettingsCache, getSettingsCache } from './lib/offlineDb';
+import { getCache, setCache, addPendingOp, setSettingsCache, getSettingsCache, clearDB } from './lib/offlineDb';
 import toast from 'react-hot-toast';
 
 const API_BASE = '/api';
@@ -104,15 +104,10 @@ async function getWithCache<T>(path: string, storeName?: 'categories' | 'counter
       }
       return data;
     } catch (e) {
-      if (e instanceof TypeError) { // Network error
-         if (!storeName) throw e;
-         if (storeName === 'settings') return (await getSettingsCache()) as T;
-         return (await getCache(storeName)) as T;
-      }
-      if (e instanceof ApiError) {
-         toast.error(e.message);
-      }
-      throw e;
+      if (!storeName) throw e;
+      console.warn('Network or API error, falling back to cache:', e);
+      if (storeName === 'settings') return (await getSettingsCache()) as T;
+      return (await getCache(storeName)) as T;
     }
   } else {
     if (!storeName) throw new Error("Offline and no cache store specified");
@@ -164,7 +159,10 @@ export const auth = {
 
   me: () => request<{ id: number; email: string }>('/auth/me'),
 
-  logout: () => request('/auth/logout', { method: 'POST' }),
+  logout: async () => {
+    await clearDB();
+    return request('/auth/logout', { method: 'POST' });
+  },
 };
 
 // ── Categories ───────────────────────────────────────────────
@@ -173,6 +171,7 @@ export interface Category {
   id: number;
   name: string;
   type: 'income' | 'expense';
+  parent_id: number | null;
   ai_hint: string | null;
   created_at: string;
 }
@@ -181,8 +180,8 @@ export const categories = {
   list: (type?: string) =>
     getWithCache<Category[]>(`/categories${type ? `?type=${type}` : ''}`, 'categories'),
 
-  create: (data: { name: string; type: string; ai_hint?: string }) =>
-    mutateOffline<Category>('POST', '/categories', data, { id: -Date.now(), ...data, created_at: new Date().toISOString() }),
+  create: (data: { name: string; type: string; parent_id?: number | null; ai_hint?: string }) =>
+    mutateOffline<Category>('POST', '/categories', data, { id: -Date.now(), ...data, parent_id: data.parent_id || null, created_at: new Date().toISOString() }),
 
   update: (id: number, data: Partial<Category>) =>
     mutateOffline<Category>('PUT', `/categories/${id}`, data, { id, ...data }),

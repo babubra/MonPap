@@ -12,7 +12,8 @@ export interface ReferenceItem {
   id: number;
   name: string;
   ai_hint?: string | null;
-  type?: string; // для категорий: 'income' | 'expense'
+  type?: string;     // для категорий: 'income' | 'expense'
+  parent_id?: number | null; // для подкатегорий
 }
 
 interface ReferenceSheetProps {
@@ -121,11 +122,38 @@ export function ReferenceSheet({
                   {search ? 'Ничего не найдено' : 'Список пуст'}
                 </div>
               ) : (
-                filtered.map((item) => (
+                filtered
+                  // Сортируем так, чтобы потомки шли за родителями (если мы не ищем)
+                  .sort((a, b) => {
+                    if (search.trim()) return 0; // При поиске просто выводим как есть
+                    const aIsChild = !!a.parent_id;
+                    const bIsChild = !!b.parent_id;
+                    if (!aIsChild && !bIsChild) return a.name.localeCompare(b.name);
+                    
+                    // a - потомок, b - родитель
+                    if (aIsChild && !bIsChild) {
+                        if (a.parent_id === b.id) return 1;
+                        const aParent = filtered.find(i => i.id === a.parent_id);
+                        return (aParent?.name || '').localeCompare(b.name) || 1;
+                    }
+                    // a - родитель, b - потомок
+                    if (!aIsChild && bIsChild) {
+                        if (b.parent_id === a.id) return -1;
+                        const bParent = filtered.find(i => i.id === b.parent_id);
+                        return a.name.localeCompare(bParent?.name || '') || -1;
+                    }
+                    // оба потомки
+                    const aParent = filtered.find(i => i.id === a.parent_id);
+                    const bParent = filtered.find(i => i.id === b.parent_id);
+                    if (a.parent_id === b.parent_id) return a.name.localeCompare(b.name);
+                    return (aParent?.name || '').localeCompare(bParent?.name || '');
+                  })
+                  .map((item) => (
                   <button
                     key={item.id}
                     className={`ref-sheet-item ${selectedId === item.id ? 'ref-sheet-item--selected' : ''}`}
                     onClick={() => handleSelect(item)}
+                    style={item.parent_id && !search.trim() ? { paddingLeft: '32px', borderLeft: '2px solid var(--accent-color)' } : {}}
                   >
                     <div>
                       <div className="ref-sheet-item-name">{item.name}</div>

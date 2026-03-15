@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.api.deps import get_current_user
-from app.db.models import Transaction, User
+from app.db.models import Category, Transaction, User
 from app.db.session import get_db
 from app.schemas import (
     TransactionCreate,
@@ -41,7 +41,7 @@ async def list_transactions(
     """
     query = (
         select(Transaction)
-        .options(joinedload(Transaction.category))
+        .options(joinedload(Transaction.category).joinedload(Category.parent))
         .where(Transaction.user_id == user.id)
     )
 
@@ -76,7 +76,13 @@ async def list_transactions(
     response = []
     for t in transactions:
         data = TransactionResponse.model_validate(t)
-        data.category_name = t.category.name if t.category else None
+        if t.category:
+            if t.category.parent:
+                data.category_name = f"{t.category.parent.name} / {t.category.name}"
+            else:
+                data.category_name = t.category.name
+        else:
+            data.category_name = None
         response.append(data)
 
     return response
@@ -108,8 +114,16 @@ async def create_transaction(
     await db.flush()
     await db.refresh(transaction, attribute_names=["category", "created_at", "updated_at"])
 
+    await db.refresh(transaction, attribute_names=["category", "created_at", "updated_at"])
+
     data = TransactionResponse.model_validate(transaction)
-    data.category_name = transaction.category.name if transaction.category else None
+    if transaction.category:
+        if transaction.category.parent:
+            data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
+        else:
+            data.category_name = transaction.category.name
+    else:
+        data.category_name = None
     return data
 
 
@@ -137,8 +151,16 @@ async def update_transaction(
     await db.flush()
     await db.refresh(transaction, attribute_names=["category", "updated_at"])
 
+    await db.refresh(transaction, attribute_names=["category", "updated_at"])
+
     data = TransactionResponse.model_validate(transaction)
-    data.category_name = transaction.category.name if transaction.category else None
+    if transaction.category:
+        if transaction.category.parent:
+            data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
+        else:
+            data.category_name = transaction.category.name
+    else:
+        data.category_name = None
     return data
 
 

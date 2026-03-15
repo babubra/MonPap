@@ -38,17 +38,20 @@ class UserResponse(BaseModel):
 class CategoryCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     type: str = Field(..., pattern=r"^(income|expense)$")
+    parent_id: int | None = None
     ai_hint: str | None = None
 
 
 class CategoryUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
     type: str | None = Field(None, pattern=r"^(income|expense)$")
+    parent_id: int | None = None
     ai_hint: str | None = None
 
 
 class CategoryResponse(BaseModel):
     id: int
+    parent_id: int | None
     name: str
     type: str
     ai_hint: str | None

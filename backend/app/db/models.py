@@ -13,7 +13,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, backref
 
 
 class Base(DeclarativeBase):
@@ -62,6 +62,7 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id", ondelete="CASCADE"), nullable=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     type: Mapped[str] = mapped_column(String(20), nullable=False)  # income | expense
     ai_hint: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -72,6 +73,13 @@ class Category(Base):
     # Связи
     user: Mapped["User"] = relationship(back_populates="categories")
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="category")
+    
+    parent: Mapped["Category"] = relationship(
+        "Category", remote_side=[id], back_populates="children"
+    )
+    children: Mapped[list["Category"]] = relationship(
+        "Category", back_populates="parent", cascade="all, delete-orphan"
+    )
 
 
 # ── Counterpart ──────────────────────────────────────────────────

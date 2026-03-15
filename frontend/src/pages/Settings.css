@@ -344,16 +344,41 @@
 }
 
 /* Форма создания */
-.ref-mgmt-add-form {
+.ref-mgmt-add-form-container {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 12px;
+  background: var(--bg-card);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
 }
 
-.ref-mgmt-add-form .input {
+.ref-mgmt-add-input {
+  width: 100%;
+}
+
+.ref-mgmt-add-form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ref-mgmt-add-select {
   flex: 1;
-  padding: 8px 12px;
-  font-size: var(--font-size-sm);
+  padding: 8px 10px;
+  font-size: var(--font-size-xs);
+  background: var(--bg-input);
+}
+
+.ref-mgmt-add-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ── Ручная форма транзакции ──────────────────── */

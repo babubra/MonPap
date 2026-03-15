@@ -20,11 +20,13 @@ export function References() {
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [newCatName, setNewCatName] = useState('');
   const [newCatType, setNewCatType] = useState<'income' | 'expense'>('expense');
+  const [newCatParentId, setNewCatParentId] = useState<number | null>(null);
   const [catSearch, setCatSearch] = useState('');
   const [expandedCatId, setExpandedCatId] = useState<number | null>(null);
   const [catHints, setCatHints] = useState<Record<number, string>>({});
   const [catEditNames, setCatEditNames] = useState<Record<number, string>>({});
   const [catEditTypes, setCatEditTypes] = useState<Record<number, 'income' | 'expense'>>({});
+  const [catEditParents, setCatEditParents] = useState<Record<number, number | null>>({});
 
   // Субъекты
   const [counterpartsList, setCounterpartsList] = useState<Counterpart[]>([]);
@@ -53,14 +55,17 @@ export function References() {
       const ch: Record<number, string> = {};
       const cn: Record<number, string> = {};
       const ct: Record<number, 'income' | 'expense'> = {};
+      const cp_parents: Record<number, number | null> = {};
       cats.forEach((c) => {
         ch[c.id] = c.ai_hint || '';
         cn[c.id] = c.name;
         ct[c.id] = c.type as 'income' | 'expense';
+        cp_parents[c.id] = c.parent_id || null;
       });
       setCatHints(ch);
       setCatEditNames(cn);
       setCatEditTypes(ct);
+      setCatEditParents(cp_parents);
 
       const cph: Record<number, string> = {};
       const cpn: Record<number, string> = {};
@@ -82,10 +87,11 @@ export function References() {
   async function addCategory() {
     if (!newCatName.trim()) return;
     try {
-      const created = await catApi.create({ name: newCatName.trim(), type: newCatType });
+      const created = await catApi.create({ name: newCatName.trim(), type: newCatType, parent_id: newCatParentId });
       setCategoriesList((prev) => [...prev, created]);
       setCatHints((prev) => ({ ...prev, [created.id]: '' }));
       setNewCatName('');
+      setNewCatParentId(null);
     } catch { /* ошибка */ }
   }
 
@@ -102,13 +108,15 @@ export function References() {
     const hint = catHints[id] ?? '';
     const editName = catEditNames[id];
     const editType = catEditTypes[id];
+    const editParentId = catEditParents[id];
     const cat = categoriesList.find((c) => c.id === id);
     if (!cat) return;
 
     // Собираем только изменённые поля
-    const patch: Partial<Pick<Category, 'name' | 'type'> & { ai_hint: string | undefined }> = {};
+    const patch: Partial<Pick<Category, 'name' | 'type' | 'parent_id'> & { ai_hint: string | undefined }> = {};
     if (editName && editName.trim() && editName.trim() !== cat.name) patch.name = editName.trim();
     if (editType && editType !== cat.type) patch.type = editType;
+    if (editParentId !== cat.parent_id) patch.parent_id = editParentId;
     if (hint !== (cat.ai_hint || '')) patch.ai_hint = hint || undefined;
 
     if (Object.keys(patch).length === 0) return; // нет изменений
@@ -117,11 +125,12 @@ export function References() {
     try {
       const updated = await catApi.update(id, patch);
       setCategoriesList((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, name: updated.name, type: updated.type, ai_hint: updated.ai_hint } : c))
+        prev.map((c) => (c.id === id ? { ...c, name: updated.name, type: updated.type, parent_id: updated.parent_id, ai_hint: updated.ai_hint } : c))
       );
       // Синхронизируем локальный стейт редактирования
       setCatEditNames((p) => ({ ...p, [id]: updated.name }));
       setCatEditTypes((p) => ({ ...p, [id]: updated.type as 'income' | 'expense' }));
+      setCatEditParents((p) => ({ ...p, [id]: updated.parent_id }));
     } catch { /* ошибка */ } finally {
       setSavingHint(null);
     }
@@ -228,13 +237,74 @@ export function References() {
             </div>
           </div>
 
+          {/* Добавить */}
+          <div className="ref-mgmt-add-form-container" style={{ marginBottom: '12px', marginTop: 0 }}>
+            <input
+              className="input ref-mgmt-add-input"
+              placeholder="Новая категория..."
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+            />
+            <div className="ref-mgmt-add-form-row">
+              <select
+                className="input ref-mgmt-add-select"
+                value={newCatParentId || ''}
+                onChange={(e) => setNewCatParentId(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">-- Базовая --</option>
+                {categoriesList
+                  .filter(c => c.type === newCatType && !c.parent_id)
+                  .map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+              </select>
+              <select
+                className="input ref-mgmt-add-select"
+                value={newCatType}
+                onChange={(e) => setNewCatType(e.target.value as 'income' | 'expense')}
+              >
+                <option value="expense">Расход</option>
+                <option value="income">Доход</option>
+              </select>
+              <button className="btn btn-primary ref-mgmt-add-btn" onClick={addCategory} disabled={!newCatName.trim()}>
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+
           {/* Список */}
           <div className="ref-mgmt-list">
             {loading
               ? [1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 44, marginBottom: 4 }} />)
               : filteredCats.length === 0
                 ? <p className="ref-empty">Нет категорий</p>
-                : filteredCats.map((cat) => {
+                : filteredCats
+                    .sort((a, b) => {
+                      if (catSearch.trim()) return 0; // При поиске просто выводим как есть
+                      const aIsChild = !!a.parent_id;
+                      const bIsChild = !!b.parent_id;
+                      if (!aIsChild && !bIsChild) return a.name.localeCompare(b.name);
+                      
+                      // a - потомок, b - родитель
+                      if (aIsChild && !bIsChild) {
+                          if (a.parent_id === b.id) return 1;
+                          const aParent = filteredCats.find(i => i.id === a.parent_id);
+                          return (aParent?.name || '').localeCompare(b.name) || 1;
+                      }
+                      // a - родитель, b - потомок
+                      if (!aIsChild && bIsChild) {
+                          if (b.parent_id === a.id) return -1;
+                          const bParent = filteredCats.find(i => i.id === b.parent_id);
+                          return a.name.localeCompare(bParent?.name || '') || -1;
+                      }
+                      // оба потомки
+                      const aParent = filteredCats.find(i => i.id === a.parent_id);
+                      const bParent = filteredCats.find(i => i.id === b.parent_id);
+                      if (a.parent_id === b.parent_id) return a.name.localeCompare(b.name);
+                      return (aParent?.name || '').localeCompare(bParent?.name || '');
+                    })
+                    .map((cat) => {
                     const isExpanded = expandedCatId === cat.id;
                     const hintValue = catHints[cat.id] ?? '';
                     const editName = catEditNames[cat.id] ?? cat.name;
@@ -244,7 +314,11 @@ export function References() {
                       <div
                         key={cat.id}
                         className={`ref-mgmt-item ${isExpanded ? 'ref-mgmt-item--expanded' : ''}`}
+                        style={cat.parent_id && !catSearch.trim() ? { marginLeft: '24px', position: 'relative' } : {}}
                       >
+                        {cat.parent_id && !catSearch.trim() && (
+                          <div style={{ position: 'absolute', left: '-12px', top: '50%', width: '12px', height: '2px', background: 'var(--border)', transform: 'translateY(-50%)' }} />
+                        )}
                         <div className="ref-mgmt-item-top">
                           <div className="ref-mgmt-item-info">
                             <span className="ref-mgmt-item-name">
@@ -261,6 +335,7 @@ export function References() {
                               onClick={() => {
                                 setCatEditNames((p) => ({ ...p, [cat.id]: cat.name }));
                                 setCatEditTypes((p) => ({ ...p, [cat.id]: cat.type as 'income' | 'expense' }));
+                                setCatEditParents((p) => ({ ...p, [cat.id]: cat.parent_id }));
                                 setExpandedCatId(isExpanded ? null : cat.id);
                               }}
                               aria-label="Редактировать"
@@ -284,6 +359,24 @@ export function References() {
                                   onKeyDown={(e) => e.key === 'Enter' && saveCategory(cat.id)}
                                   placeholder="Название категории"
                                 />
+                              </div>
+
+                              {/* Родительская категория */}
+                              <div className="ref-mgmt-edit-field">
+                                <label className="ref-mgmt-edit-label">Внутри категории</label>
+                                <select
+                                  className="input"
+                                  style={{ padding: '8px 10px', fontSize: 'var(--font-size-xs)' }}
+                                  value={catEditParents[cat.id] || ''}
+                                  onChange={(e) => setCatEditParents((p) => ({ ...p, [cat.id]: e.target.value ? Number(e.target.value) : null }))}
+                                >
+                                  <option value="">-- Основная категория --</option>
+                                  {categoriesList
+                                    .filter(c => c.type === editType && c.id !== cat.id && !c.parent_id)
+                                    .map(c => (
+                                      <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
                               </div>
 
                               {/* Тип категории */}
@@ -364,29 +457,6 @@ export function References() {
                     );
                   })}
 
-          </div>
-
-          {/* Добавить */}
-          <div className="ref-mgmt-add-form">
-            <input
-              className="input"
-              placeholder="Новая категория..."
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-            />
-            <select
-              className="input"
-              style={{ width: 'auto', flex: 'none', padding: '8px 10px', fontSize: 'var(--font-size-xs)' }}
-              value={newCatType}
-              onChange={(e) => setNewCatType(e.target.value as 'income' | 'expense')}
-            >
-              <option value="expense">Расход</option>
-              <option value="income">Доход</option>
-            </select>
-            <button className="btn btn-primary btn-sm" onClick={addCategory} disabled={!newCatName.trim()}>
-              <Plus size={14} />
-            </button>
           </div>
         </div>
       )}
