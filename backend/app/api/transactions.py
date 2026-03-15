@@ -146,7 +146,7 @@ async def update_transaction(
     """Обновление транзакции."""
     result = await db.execute(
         select(Transaction)
-        .options(joinedload(Transaction.category))
+        .options(joinedload(Transaction.category).joinedload(Category.parent))
         .where(Transaction.id == transaction_id, Transaction.user_id == user.id)
     )
     transaction = result.unique().scalar_one_or_none()
@@ -158,9 +158,14 @@ async def update_transaction(
         setattr(transaction, field, value)
 
     await db.flush()
-    await db.refresh(transaction, attribute_names=["category", "updated_at"])
 
-    await db.refresh(transaction, attribute_names=["category", "updated_at"])
+    # Перезагружаем с eager-загрузкой category и parent
+    result = await db.execute(
+        select(Transaction)
+        .options(joinedload(Transaction.category).joinedload(Category.parent))
+        .where(Transaction.id == transaction.id)
+    )
+    transaction = result.unique().scalar_one()
 
     data = TransactionResponse.model_validate(transaction)
     if transaction.category:
