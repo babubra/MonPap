@@ -14,6 +14,7 @@ import {
 import { EmojiPicker } from '../components/EmojiPicker';
 import { CategoryEditSheet } from '../components/CategoryEditSheet';
 import { CounterpartEditSheet } from '../components/CounterpartEditSheet';
+import toast from 'react-hot-toast';
 import './References.css';
 
 export function References() {
@@ -62,6 +63,14 @@ export function References() {
 
   async function addCategory() {
     if (!newCatName.trim()) return;
+    // Проверка дубликата
+    const duplicate = categoriesList.find(
+      (c) => c.name.toLowerCase() === newCatName.trim().toLowerCase() && c.type === newCatType
+    );
+    if (duplicate) {
+      toast.error(`Категория «${duplicate.name}» уже существует`);
+      return;
+    }
     try {
       const created = await catApi.create({ name: newCatName.trim(), type: newCatType, parent_id: newCatParentId, icon: newCatIcon || undefined });
       setCategoriesList((prev) => [...prev, created]);
@@ -90,6 +99,14 @@ export function References() {
 
   async function addCounterpart() {
     if (!newCpName.trim()) return;
+    // Проверка дубликата
+    const duplicate = counterpartsList.find(
+      (cp) => cp.name.toLowerCase() === newCpName.trim().toLowerCase()
+    );
+    if (duplicate) {
+      toast.error(`Субъект «${duplicate.name}» уже существует`);
+      return;
+    }
     try {
       const created = await cpApi.create({ name: newCpName.trim(), icon: newCpIcon || undefined });
       setCounterpartsList((prev) => [...prev, created]);
@@ -284,6 +301,24 @@ export function References() {
             </div>
           </div>
 
+          {/* Добавить — ВВЕРХУ перед списком */}
+          <div className="ref-mgmt-add-form-container" style={{ marginBottom: '12px', marginTop: 0 }}>
+            <div className="ref-mgmt-add-form">
+              <EmojiPicker value={newCpIcon || null} onChange={setNewCpIcon} placeholder="😊" />
+              <input
+                className="input"
+                placeholder="Новый субъект..."
+                value={newCpName}
+                onChange={(e) => setNewCpName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCounterpart()}
+                style={{ flex: 1 }}
+              />
+              <button className="btn btn-primary btn-sm" onClick={addCounterpart} disabled={!newCpName.trim()}>
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
           {/* Список */}
           <div className="ref-mgmt-list">
             {loading
@@ -312,22 +347,6 @@ export function References() {
                       </div>
                     </div>
                   ))}
-          </div>
-
-          {/* Добавить */}
-          <div className="ref-mgmt-add-form">
-            <EmojiPicker value={newCpIcon || null} onChange={setNewCpIcon} placeholder="😊" />
-            <input
-              className="input"
-              placeholder="Новый субъект..."
-              value={newCpName}
-              onChange={(e) => setNewCpName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addCounterpart()}
-              style={{ flex: 1 }}
-            />
-            <button className="btn btn-primary btn-sm" onClick={addCounterpart} disabled={!newCpName.trim()}>
-              <Plus size={14} />
-            </button>
           </div>
         </div>
       )}
