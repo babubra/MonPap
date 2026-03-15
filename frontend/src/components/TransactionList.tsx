@@ -45,13 +45,22 @@ function groupByDate(items: Transaction[]): { date: string; label: string; items
     map.get(key)!.push(tx);
   }
 
-  return Array.from(map.entries()).map(([date, txs]) => {
-    let label: string;
-    if (date === todayKey) label = 'Сегодня';
-    else if (date === yesterdayKey) label = 'Вчера';
-    else label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-    return { date, label, items: txs };
-  });
+  return Array.from(map.entries())
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, txs]) => {
+      // Сортируем внутри дня: сначала новые (по времени или id)
+      txs.sort((a, b) => {
+        const timeDiff = new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime();
+        if (timeDiff !== 0) return timeDiff;
+        return b.id - a.id;
+      });
+
+      let label: string;
+      if (date === todayKey) label = 'Сегодня';
+      else if (date === yesterdayKey) label = 'Вчера';
+      else label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      return { date, label, items: txs };
+    });
 }
 
 /** Вычисляет date_from/date_to по режиму. */

@@ -51,7 +51,13 @@ export function Home() {
         txApi.list({ limit: 10 }),
       ]);
       setSummary(s);
-      setRecent(r);
+      
+      const sortedRecent = [...r].sort((a, b) => {
+        const timeDiff = new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime();
+        if (timeDiff !== 0) return timeDiff;
+        return b.id - a.id;
+      });
+      setRecent(sortedRecent);
     } catch (e: any) {
       toast.error(e.message || 'Ошибка загрузки данных');
     } finally {

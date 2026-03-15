@@ -32,21 +32,29 @@ function groupDebtsByDate(items: Debt[]): { date: string; label: string; items: 
     map.get(key)!.push(debt);
   }
 
-  return Array.from(map.entries()).map(([date, debts]) => {
-    let label: string;
-    if (date === todayKey) {
-      label = 'Сегодня';
-    } else if (date === yesterdayKey) {
-      label = 'Вчера';
-    } else {
-      label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+  return Array.from(map.entries())
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, debts]) => {
+      debts.sort((a, b) => {
+        const timeDiff = new Date(b.debt_date).getTime() - new Date(a.debt_date).getTime();
+        if (timeDiff !== 0) return timeDiff;
+        return b.id - a.id;
       });
-    }
-    return { date, label, items: debts };
-  });
+
+      let label: string;
+      if (date === todayKey) {
+        label = 'Сегодня';
+      } else if (date === yesterdayKey) {
+        label = 'Вчера';
+      } else {
+        label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+      }
+      return { date, label, items: debts };
+    });
 }
 
 export function Debts() {
