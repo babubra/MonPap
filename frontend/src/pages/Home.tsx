@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Eye, EyeOff, Send, Mic, MicOff, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
+import { Eye, EyeOff, Send, Mic, MicOff, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import {
@@ -276,27 +276,17 @@ export function Home() {
 
         <div className="summary-grid">
           <div className="summary-item">
-            <div className="summary-item-icon income">
-              <TrendingUp size={18} />
-            </div>
-            <div>
-              <span className="summary-item-label">Доходы</span>
-              <span className="summary-item-value text-income amount">
-                {loading ? '...' : `+${formatAmount(summary?.total_income || '0')} ₽`}
-              </span>
-            </div>
+            <span className="summary-item-label">Доходы</span>
+            <span className="summary-item-value text-income amount">
+              {loading ? '...' : `+${formatAmount(summary?.total_income || '0')} ₽`}
+            </span>
           </div>
 
           <div className="summary-item">
-            <div className="summary-item-icon expense">
-              <TrendingDown size={18} />
-            </div>
-            <div>
-              <span className="summary-item-label">Расходы</span>
-              <span className="summary-item-value text-expense amount">
-                {loading ? '...' : `-${formatAmount(summary?.total_expense || '0')} ₽`}
-              </span>
-            </div>
+            <span className="summary-item-label">Расходы</span>
+            <span className="summary-item-value text-expense amount">
+              {loading ? '...' : `-${formatAmount(summary?.total_expense || '0')} ₽`}
+            </span>
           </div>
         </div>
 

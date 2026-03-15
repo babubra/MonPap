@@ -28,27 +28,8 @@
 
 .summary-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.summary-item-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-}
-
-.summary-item-icon.income {
-  background: var(--income-bg);
-  color: var(--income);
-}
-
-.summary-item-icon.expense {
-  background: var(--expense-bg);
-  color: var(--expense);
+  flex-direction: column;
+  gap: 4px;
 }
 
 .summary-item-label {
@@ -59,7 +40,9 @@
 
 .summary-item-value {
   display: block;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .summary-balance {
