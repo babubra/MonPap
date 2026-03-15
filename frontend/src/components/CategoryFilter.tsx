@@ -67,10 +67,18 @@ export function CategoryFilter({ categories, selectedIds, onChange }: CategoryFi
   const isSelected = (id: number) => selectedIds.includes(id);
 
   function toggle(id: number) {
+    // Собираем все ID, связанные с этой категорией
+    const children = childrenMap.get(id) || [];
+    const childIds = children.map(c => c.id);
+    const allIds = [id, ...childIds]; // родитель + все дети
+
     if (isSelected(id)) {
-      onChange(selectedIds.filter((x) => x !== id));
+      // Убираем родителя и всех детей
+      onChange(selectedIds.filter((x) => !allIds.includes(x)));
     } else {
-      onChange([...selectedIds, id]);
+      // Добавляем родителя и всех детей (без дублей)
+      const newIds = new Set([...selectedIds, ...allIds]);
+      onChange(Array.from(newIds));
     }
   }
 
@@ -79,14 +87,19 @@ export function CategoryFilter({ categories, selectedIds, onChange }: CategoryFi
     setOpen(false);
   }
 
-  // Кнопка label
+  // Кнопка label — считаем только «корневые» выбранные (не дочерние, если родитель тоже выбран)
   const buttonLabel = (() => {
     if (selectedIds.length === 0) return 'Все';
-    if (selectedIds.length === 1) {
-      const cat = categories.find((c) => c.id === selectedIds[0]);
+    // Убираем дочерние, если их родитель тоже выбран
+    const topLevelSelected = selectedIds.filter(id => {
+      const cat = categories.find(c => c.id === id);
+      return cat && (!cat.parent_id || !selectedIds.includes(cat.parent_id));
+    });
+    if (topLevelSelected.length === 1) {
+      const cat = categories.find((c) => c.id === topLevelSelected[0]);
       return cat ? (cat.icon ? `${cat.icon} ${cat.name}` : cat.name) : 'Все';
     }
-    return `${selectedIds.length} кат.`;
+    return `${topLevelSelected.length} кат.`;
   })();
 
   return (
