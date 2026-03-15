@@ -1,0 +1,41 @@
+/* PullToRefresh.css */
+
+.pull-to-refresh {
+  position: relative;
+}
+
+.ptr-indicator {
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ptr-indicator--animating {
+  transition: height 0.3s ease;
+}
+
+.ptr-indicator-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.ptr-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  transition: opacity 0.15s ease;
+}
+
+.ptr-spinner--spinning {
+  animation: ptr-spin 0.7s linear infinite;
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}

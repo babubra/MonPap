@@ -14,6 +14,7 @@ import { DebtPaymentSheet } from '../components/DebtPaymentSheet';
 import { DebtEditForm, type DebtEditFormRef } from '../components/DebtEditForm';
 import { Drawer } from 'vaul';
 import toast from 'react-hot-toast';
+import { PullToRefresh } from '../components/PullToRefresh';
 import './Debts.css';
 import '../components/TransactionDetailsSheet.css';
 
@@ -140,6 +141,7 @@ export function Debts() {
   }
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <div className="page container">
       <div
         className="page-header"
@@ -439,5 +441,6 @@ export function Debts() {
         </Drawer.Portal>
       </Drawer.Root>
     </div>
+    </PullToRefresh>
   );
 }
