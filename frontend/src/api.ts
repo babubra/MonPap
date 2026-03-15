@@ -221,16 +221,20 @@ export const transactions = {
     month?: number;
     date_from?: string;   // YYYY-MM-DD
     date_to?: string;     // YYYY-MM-DD
-    category_id?: number;
+    category_ids?: number[];
     search?: string;
     limit?: number;
     offset?: number;
   }) => {
     const query = new URLSearchParams();
     if (params) {
-      Object.entries(params).forEach(([k, v]) => {
+      const { category_ids, ...rest } = params;
+      Object.entries(rest).forEach(([k, v]) => {
         if (v !== undefined) query.set(k, String(v));
       });
+      if (category_ids && category_ids.length > 0) {
+        category_ids.forEach(id => query.append('category_id', String(id)));
+      }
     }
     const qs = query.toString();
     return request<Transaction[]>(`/transactions${qs ? `?${qs}` : ''}`);

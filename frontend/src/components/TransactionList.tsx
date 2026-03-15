@@ -11,9 +11,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { transactions as txApi, categories as catApi, type Transaction, type Category } from '../api';
 import { TransactionDetailsSheet } from './TransactionDetailsSheet';
+import { CategoryFilter } from './CategoryFilter';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import './TransactionList.css';
 
@@ -119,8 +120,7 @@ export function TransactionList({ type }: TransactionListProps) {
 
   // Категории
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCatId, setSelectedCatId] = useState<number | null>(null);
-  const [catDropOpen, setCatDropOpen] = useState(false);
+  const [selectedCatIds, setSelectedCatIds] = useState<number[]>([]);
 
   // Загружаем категории один раз
   useEffect(() => {
@@ -135,7 +135,7 @@ export function TransactionList({ type }: TransactionListProps) {
       const data = await txApi.list({
         type: type || undefined,
         ...periodParams,
-        category_id: selectedCatId ?? undefined,
+        category_ids: selectedCatIds.length > 0 ? selectedCatIds : undefined,
         search: search || undefined,
         limit: 500,
       });
@@ -146,7 +146,7 @@ export function TransactionList({ type }: TransactionListProps) {
       setLoading(false);
       setIsInitialLoad(false);
     }
-  }, [type, periodMode, year, month, rangeFrom, rangeTo, selectedCatId, search]);
+  }, [type, periodMode, year, month, rangeFrom, rangeTo, selectedCatIds, search]);
 
   useEffect(() => {
     loadData();
@@ -171,7 +171,6 @@ export function TransactionList({ type }: TransactionListProps) {
   function handleModeChange(mode: PeriodMode) {
     setPeriodMode(mode);
     setExpandedTxId(null);
-    setCatDropOpen(false);
   }
 
   /** 1-й клик — раскрыть; 2-й клик на раскрытую — открыть шторку. */
@@ -210,7 +209,9 @@ export function TransactionList({ type }: TransactionListProps) {
   })();
 
   const total = items.reduce((sum, tx) => sum + Number(tx.amount), 0);
-  const selectedCat = categories.find(c => c.id === selectedCatId) || null;
+  const selectedCatNames = selectedCatIds.length > 0
+    ? categories.filter(c => selectedCatIds.includes(c.id)).map(c => c.name).join(', ')
+    : null;
 
   return (
     <>
@@ -289,37 +290,11 @@ export function TransactionList({ type }: TransactionListProps) {
         </div>
 
         {/* Фильтр по категории */}
-        <div className="tx-cat-filter" style={{ position: 'relative' }}>
-          <button
-            className={`tx-cat-btn ${selectedCatId ? 'active' : ''}`}
-            onClick={() => setCatDropOpen((o) => !o)}
-          >
-            <span className="tx-cat-btn-label">
-              {selectedCat ? selectedCat.name : 'Все'}
-            </span>
-            <ChevronDown size={12} />
-          </button>
-
-          {catDropOpen && (
-            <div className="tx-cat-dropdown">
-              <button
-                className={`tx-cat-option ${!selectedCatId ? 'active' : ''}`}
-                onClick={() => { setSelectedCatId(null); setCatDropOpen(false); }}
-              >
-                Все категории
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  className={`tx-cat-option ${selectedCatId === c.id ? 'active' : ''}`}
-                  onClick={() => { setSelectedCatId(c.id); setCatDropOpen(false); }}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <CategoryFilter
+          categories={categories}
+          selectedIds={selectedCatIds}
+          onChange={setSelectedCatIds}
+        />
       </div>
 
       {/* Итого — только для Доходов и Расходов, не для общего списка */}
@@ -327,7 +302,7 @@ export function TransactionList({ type }: TransactionListProps) {
         <div className="tx-total" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out' }}>
           <span>
             {items.length} записей
-            {selectedCat && <span className="tx-total-cat"> · {selectedCat.name}</span>}
+            {selectedCatNames && <span className="tx-total-cat"> · {selectedCatNames}</span>}
           </span>
           <span className={`tx-total-amount amount ${type === 'income' ? 'text-income' : type === 'expense' ? 'text-expense' : ''}`}>
             {type === 'income' ? '+' : type === 'expense' ? '-' : ''}{formatAmount(total)} ₽
@@ -344,7 +319,7 @@ export function TransactionList({ type }: TransactionListProps) {
         </div>
       ) : items.length === 0 && !loading ? (
         <div className="empty-state">
-          <p>{search || selectedCatId ? 'Ничего не найдено' : 'Нет записей за этот период'}</p>
+          <p>{search || selectedCatIds.length > 0 ? 'Ничего не найдено' : 'Нет записей за этот период'}</p>
           <p className="text-secondary">Добавьте на главной странице</p>
         </div>
       ) : items.length === 0 && loading ? (

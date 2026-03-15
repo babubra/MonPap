@@ -28,7 +28,7 @@ async def list_transactions(
     month: int | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
-    category_id: int | None = None,
+    category_id: list[int] | None = Query(None),
     search: str | None = None,
     limit: int = Query(500, ge=1, le=1000),
     offset: int = Query(0, ge=0),
@@ -38,6 +38,7 @@ async def list_transactions(
     """Список транзакций с фильтрами, пагинацией и поиском.
 
     Приоритет периода: date_from/date_to > year+month > year.
+    category_id может быть списком (несколько значений) для мульти-фильтра.
     """
     query = (
         select(Transaction)
@@ -60,8 +61,8 @@ async def list_transactions(
         if month:
             query = query.where(extract("month", Transaction.transaction_date) == month)
 
-    if category_id is not None:
-        query = query.where(Transaction.category_id == category_id)
+    if category_id:
+        query = query.where(Transaction.category_id.in_(category_id))
 
     if search:
         query = query.where(Transaction.comment.ilike(f"%{search}%"))
