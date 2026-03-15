@@ -25,26 +25,27 @@
 }
 
 .vaul-body {
-  padding: 0 20px 32px;
+  padding: 0 20px 16px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Прилипающий футер с кнопками — используется во всех Bottom Sheet */
+.sheet-footer {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 12px 20px 28px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+}
+
+.sheet-footer .btn {
   flex: 1;
 }
 
-.tx-details-content {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 251;
-  max-height: 96vh;
-  outline: none;
-  background: var(--bg-secondary);
-  border-top-left-radius: var(--radius-xl);
-  border-top-right-radius: var(--radius-xl);
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .vaul-handle {
   width: 36px;
@@ -207,14 +208,8 @@
   padding-left: 10px;
 }
 
-/* Actions */
-.tx-details-actions {
-  margin-top: 16px;
-  padding: 0 20px 24px;
-}
-
+/* Стиль кнопки «Удалить» в sheet-footer */
 .tx-details-delete {
-  width: 100%;
   background: var(--expense-bg);
   color: var(--expense);
   border: none;

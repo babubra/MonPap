@@ -6,7 +6,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 150;
+  z-index: 250;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -15,15 +15,28 @@
 
 .parse-card {
   width: 100%;
-  max-width: var(--content-max-width);
   background: var(--bg-secondary);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
-  padding: 20px 16px 32px;
   animation: slideUp var(--transition-base) ease-out;
-  max-height: 85dvh;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Скролляемая часть карточки */
+.parse-body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  flex: 1;
+  padding: 0 20px;
+  min-height: 0; /* важно для flexскролла */
+}
+
+/* Шапка вверху — вне скролла */
+.parse-header {
+  padding: 16px 20px 0;
+  flex-shrink: 0;
 }
 
 .parse-handle {
@@ -173,6 +186,10 @@
 .parse-actions {
   display: flex;
   gap: 10px;
+  flex-shrink: 0;
+  padding: 12px 20px 28px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
 }
 
 .parse-actions .btn {

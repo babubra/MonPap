@@ -2,7 +2,7 @@
  * Debts — страница долгов: активные/закрытые, прогресс-бар, платежи.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import {
   Landmark, ArrowUpRight, ArrowDownLeft,
@@ -11,7 +11,7 @@ import {
 import { debts as debtsApi, counterparts as cpApi, type Debt, type DebtPayment, type Counterpart } from '../api';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import { DebtPaymentSheet } from '../components/DebtPaymentSheet';
-import { DebtEditForm } from '../components/DebtEditForm';
+import { DebtEditForm, type DebtEditFormRef } from '../components/DebtEditForm';
 import { Drawer } from 'vaul';
 import toast from 'react-hot-toast';
 import './Debts.css';
@@ -74,6 +74,7 @@ export function Debts() {
 
   // Редактирование долга
   const [editingId, setEditingId] = useState<number | null>(null);
+  const debtEditRef = useRef<DebtEditFormRef>(null);
   const [confirmDeleteDebtId, setConfirmDeleteDebtId] = useState<number | null>(null);
 
   const loadData = useCallback(async () => {
@@ -414,13 +415,25 @@ export function Debts() {
                 if (!debt) return null;
                 return (
                   <DebtEditForm
+                    ref={debtEditRef}
                     debt={debt}
                     counterpartsList={counterpartsList}
-                    onCancel={() => setEditingId(null)}
                     onSaved={() => { setEditingId(null); loadData(); }}
                   />
                 );
               })()}
+            </div>
+            {/* Sticky footer */}
+            <div className="sheet-footer">
+              <button className="btn btn-secondary" onClick={() => setEditingId(null)}>
+                <X size={15} /> Отмена
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => debtEditRef.current?.save()}
+              >
+                Сохранить
+              </button>
             </div>
           </Drawer.Content>
         </Drawer.Portal>

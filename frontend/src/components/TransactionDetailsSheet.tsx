@@ -123,7 +123,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
       <Drawer.Root open={open} onOpenChange={onOpenChange}>
         <Drawer.Portal>
           <Drawer.Overlay className="vaul-overlay" />
-          <Drawer.Content className="vaul-content tx-details-content glass">
+          <Drawer.Content className="vaul-content glass">
             {transaction && (
               <>
                 <div className="vaul-handle" />
@@ -252,25 +252,27 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                     
                   </div>
 
-                  <div className="tx-details-actions">
-                    {confirmDelete ? (
-                      <>
-                        <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
-                          Отмена
-                        </button>
-                        <button className="btn btn-danger-outline" onClick={handleDelete}>
-                          <Trash2 size={16} /> Да, удалить
-                        </button>
-                      </>
-                    ) : (
-                      <button className="btn btn-secondary tx-details-delete" onClick={() => setConfirmDelete(true)}>
-                        <Trash2 size={16} />
-                        Удалить запись
-                      </button>
-                    )}
-                  </div>
-
                 </div>
+
+                {/* Sticky footer — кнопка удаления */}
+                <div className="sheet-footer">
+                  {confirmDelete ? (
+                    <>
+                      <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
+                        Отмена
+                      </button>
+                      <button className="btn btn-danger-outline" onClick={handleDelete}>
+                        <Trash2 size={16} /> Да, удалить
+                      </button>
+                    </>
+                  ) : (
+                    <button className="btn btn-secondary tx-details-delete" onClick={() => setConfirmDelete(true)} style={{ flex: 1 }}>
+                      <Trash2 size={16} />
+                      Удалить запись
+                    </button>
+                  )}
+                </div>
+
               </>
             )}
           </Drawer.Content>

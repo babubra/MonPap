@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Drawer } from 'vaul';
+import { X } from 'lucide-react';
 import { debts as debtsApi } from '../api';
 import './DebtPaymentSheet.css';
 
@@ -46,18 +47,16 @@ export function DebtPaymentSheet({ debtId, open, onOpenChange, onSaved }: DebtPa
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
-        <Drawer.Overlay style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
-        <Drawer.Content
-          style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-            background: 'var(--bg-secondary)',
-            borderTopLeftRadius: 'var(--radius-xl)',
-            borderTopRightRadius: 'var(--radius-xl)',
-          }}
-        >
-          <div className="payment-form">
-            <div className="ref-sheet-handle" />
-            <Drawer.Title className="payment-form-title">Добавить платёж</Drawer.Title>
+        <Drawer.Overlay className="vaul-overlay" />
+        <Drawer.Content className="vaul-content glass">
+          <div className="vaul-handle" />
+          <div className="vaul-body">
+            <div className="tx-details-header">
+              <Drawer.Title className="tx-details-type">Добавить платёж</Drawer.Title>
+              <button className="btn btn-ghost btn-icon" onClick={() => onOpenChange(false)}>
+                <X size={20} />
+              </button>
+            </div>
 
             <div className="payment-form-fields">
               <div>
@@ -91,22 +90,24 @@ export function DebtPaymentSheet({ debtId, open, onOpenChange, onSaved }: DebtPa
                 />
               </div>
             </div>
+          </div>
 
-            <div className="parse-actions">
-              <button className="btn btn-secondary" onClick={() => onOpenChange(false)}>
-                Отмена
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={handleAddPayment}
-                disabled={!payAmount || paySaving}
-              >
-                {paySaving ? 'Сохраняю...' : 'Сохранить'}
-              </button>
-            </div>
+          {/* Sticky footer */}
+          <div className="sheet-footer">
+            <button className="btn btn-secondary" onClick={() => onOpenChange(false)}>
+              Отмена
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleAddPayment}
+              disabled={!payAmount || paySaving}
+            >
+              {paySaving ? 'Сохраняю...' : 'Сохранить'}
+            </button>
           </div>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
   );
 }
+

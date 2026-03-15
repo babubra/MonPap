@@ -1,16 +1,22 @@
-import { useState } from 'react';
-import { Pencil, Check, X } from 'lucide-react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
+import { Pencil } from 'lucide-react';
 import { debts as debtsApi, type Debt, type Counterpart } from '../api';
 import './DebtEditForm.css';
 
 interface DebtEditFormProps {
   debt: Debt;
   counterpartsList: Counterpart[];
-  onCancel: () => void;
   onSaved: () => void;
 }
 
-export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: DebtEditFormProps) {
+export interface DebtEditFormRef {
+  save: () => Promise<void>;
+  isSaving: boolean;
+  canSave: boolean;
+}
+
+export const DebtEditForm = forwardRef<DebtEditFormRef, DebtEditFormProps>(
+  function DebtEditForm({ debt, counterpartsList, onSaved }, ref) {
   const [editAmount, setEditAmount] = useState(String(debt.amount));
   const [editDate, setEditDate] = useState(debt.debt_date.split('T')[0]);
   const [editComment, setEditComment] = useState(debt.comment || '');
@@ -34,6 +40,12 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
     }
   }
 
+  useImperativeHandle(ref, () => ({
+    save: handleSaveEdit,
+    isSaving: editSaving,
+    canSave: !!editAmount && !!editDate,
+  }));
+
   return (
     <div className="debt-edit-form">
       <div className="debt-edit-form-title">
@@ -43,7 +55,7 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
         <div>
           <label className="debt-edit-label">Сумма</label>
           <input
-            className="input debt-edit-input"
+            className="input"
             type="number"
             value={editAmount}
             onChange={(e) => setEditAmount(e.target.value)}
@@ -52,7 +64,7 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
         <div>
           <label className="debt-edit-label">Дата</label>
           <input
-            className="input debt-edit-input"
+            className="input"
             type="date"
             value={editDate}
             onChange={(e) => setEditDate(e.target.value)}
@@ -61,7 +73,7 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
         <div>
           <label className="debt-edit-label">Субъект</label>
           <select
-            className="input debt-edit-input"
+            className="input"
             value={editCounterpartId}
             onChange={(e) => setEditCounterpartId(e.target.value === '' ? '' : Number(e.target.value))}
           >
@@ -74,7 +86,7 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
         <div>
           <label className="debt-edit-label">Комментарий</label>
           <input
-            className="input debt-edit-input"
+            className="input"
             type="text"
             placeholder="Необязательно"
             value={editComment}
@@ -82,18 +94,6 @@ export function DebtEditForm({ debt, counterpartsList, onCancel, onSaved }: Debt
           />
         </div>
       </div>
-      <div className="debt-edit-actions">
-        <button className="btn btn-secondary btn-sm" onClick={onCancel}>
-          <X size={13} /> Отмена
-        </button>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={handleSaveEdit}
-          disabled={editSaving || !editAmount || !editDate}
-        >
-          {editSaving ? 'Сохранение...' : <><Check size={13} /> Сохранить</>}
-        </button>
-      </div>
     </div>
   );
-}
+});

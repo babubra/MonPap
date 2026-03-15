@@ -161,34 +161,35 @@ export function CategoryEditSheet({ category, allCategories, open, onOpenChange,
               </div>
             </div>
 
-            {/* Кнопки действий */}
-            <div style={{ display: 'flex', gap: 10, marginTop: 20, paddingBottom: 8 }}>
-              {confirmDelete ? (
-                <>
-                  <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
-                    Отмена
-                  </button>
-                  <button className="btn btn-danger-outline" onClick={handleDelete}>
-                    <Trash2 size={15} /> Да, удалить
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn-secondary tx-details-delete" onClick={() => setConfirmDelete(true)}>
-                    <Trash2 size={15} /> Удалить
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSave}
-                    disabled={saving || !editName.trim()}
-                  >
-                    <Check size={15} /> {saving ? 'Сохраняю...' : 'Сохранить'}
-                  </button>
-                </>
-              )}
-            </div>
+          </div>{/* /vaul-body */}
 
+          {/* Sticky footer — всегда виден */}
+          <div className="sheet-footer">
+            {confirmDelete ? (
+              <>
+                <button className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
+                  Отмена
+                </button>
+                <button className="btn btn-danger-outline" onClick={handleDelete}>
+                  <Trash2 size={15} /> Да, удалить
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn btn-secondary tx-details-delete" onClick={() => setConfirmDelete(true)}>
+                  <Trash2 size={15} /> Удалить
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSave}
+                  disabled={saving || !editName.trim()}
+                >
+                  <Check size={15} /> {saving ? 'Сохраняю...' : 'Сохранить'}
+                </button>
+              </>
+            )}
           </div>
+
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Drawer } from 'vaul';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import {
   transactions as txApi,
   categories as catApi,
@@ -84,18 +84,16 @@ export function ManualTransactionSheet({ open, onOpenChange, onSaved }: ManualTr
     <>
       <Drawer.Root open={open} onOpenChange={onOpenChange}>
         <Drawer.Portal>
-          <Drawer.Overlay style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
-          <Drawer.Content
-            style={{
-              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-              background: 'var(--bg-secondary)',
-              borderTopLeftRadius: 'var(--radius-xl)',
-              borderTopRightRadius: 'var(--radius-xl)',
-            }}
-          >
-            <div className="manual-tx-content">
-              <div className="manual-tx-handle" />
-              <Drawer.Title className="manual-tx-title">Новая транзакция</Drawer.Title>
+          <Drawer.Overlay className="vaul-overlay" />
+          <Drawer.Content className="vaul-content glass">
+            <div className="vaul-handle" />
+            <div className="vaul-body">
+              <div className="tx-details-header">
+                <Drawer.Title className="tx-details-type">Новая транзакция</Drawer.Title>
+                <button className="btn btn-ghost btn-icon" onClick={() => onOpenChange(false)}>
+                  <X size={20} />
+                </button>
+              </div>
 
               <div className="manual-tx-fields">
                 {/* Тип */}
@@ -166,19 +164,20 @@ export function ManualTransactionSheet({ open, onOpenChange, onSaved }: ManualTr
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="parse-actions">
-                <button className="btn btn-secondary" onClick={() => onOpenChange(false)}>
-                  Отмена
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={saveManualTx}
-                  disabled={!mAmount || mSaving}
-                >
-                  {mSaving ? 'Сохраняю...' : 'Сохранить'}
-                </button>
-              </div>
+            {/* Sticky footer */}
+            <div className="sheet-footer">
+              <button className="btn btn-secondary" onClick={() => onOpenChange(false)}>
+                Отмена
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={saveManualTx}
+                disabled={!mAmount || mSaving}
+              >
+                {mSaving ? 'Сохраняю...' : 'Сохранить'}
+              </button>
             </div>
           </Drawer.Content>
         </Drawer.Portal>
@@ -196,3 +195,4 @@ export function ManualTransactionSheet({ open, onOpenChange, onSaved }: ManualTr
     </>
   );
 }
+
