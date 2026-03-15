@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Pencil, X, Calendar, MessageSquare, Save, Trash2, Cpu } from 'lucide-react';
+import { Pencil, X, Calendar, MessageSquare, Check, Trash2, Cpu } from 'lucide-react';
 import { Drawer } from 'vaul';
 import { 
   transactions as txApi, 
@@ -147,12 +147,11 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                           className="tx-details-input-h1"
                           value={editAmount}
                           onChange={(e) => setEditAmount(e.target.value)}
-                          onBlur={handleSaveAmount}
                           onKeyDown={(e) => e.key === 'Enter' && handleSaveAmount()}
                           autoFocus
                         />
                         <button className="btn btn-primary btn-icon" onClick={handleSaveAmount}>
-                          <Save size={18} />
+                          <Check size={18} />
                         </button>
                       </div>
                     ) : (
@@ -196,7 +195,6 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                             className="input"
                             value={editDate}
                             onChange={(e) => setEditDate(e.target.value)}
-                            onBlur={handleSaveDate}
                             onKeyDown={(e) => e.key === 'Enter' && handleSaveDate()}
                             autoFocus
                           />
@@ -205,10 +203,16 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                             {new Date(transaction.transaction_date).toLocaleDateString('ru-RU', {
                               day: 'numeric', month: 'long', year: 'numeric'
                             })}
-                            <Pencil size={14} className="tx-details-inline-edit-icon" />
                           </span>
                         )}
                       </div>
+                      {editingField === 'date' ? (
+                        <button className="btn btn-primary btn-icon btn-check" onClick={handleSaveDate}>
+                          <Check size={16} />
+                        </button>
+                      ) : (
+                        <Pencil size={14} className="tx-details-inline-edit-icon" onClick={() => setEditingField('date')} />
+                      )}
                     </div>
 
                     {/* Comment */}
@@ -224,17 +228,22 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange, onUpd
                             className="input"
                             value={editComment}
                             onChange={(e) => setEditComment(e.target.value)}
-                            onBlur={handleSaveComment}
                             onKeyDown={(e) => e.key === 'Enter' && handleSaveComment()}
                             autoFocus
                           />
                         ) : (
                           <span className={`tx-details-value ${!transaction.comment ? 'text-muted' : ''}`} onClick={() => setEditingField('comment')}>
                             {transaction.comment || 'Нет комментария'}
-                            <Pencil size={14} className="tx-details-inline-edit-icon" />
                           </span>
                         )}
                       </div>
+                      {editingField === 'comment' ? (
+                        <button className="btn btn-primary btn-icon btn-check" onClick={handleSaveComment}>
+                          <Check size={16} />
+                        </button>
+                      ) : (
+                        <Pencil size={14} className="tx-details-inline-edit-icon" onClick={() => setEditingField('comment')} />
+                      )}
                     </div>
 
                     {/* Raw AI Text */}

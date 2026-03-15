@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Pencil, AlertTriangle, XCircle, X, ChevronDown, Sparkles } from 'lucide-react';
+import { Pencil, AlertTriangle, XCircle, X, ChevronDown, Sparkles, Check } from 'lucide-react';
 import {
   type AiParseResult,
   categories as catApi,
@@ -440,7 +440,6 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="number"
                   value={data.amount || ''}
                   onChange={(e) => update({ amount: Number(e.target.value) })}
-                  onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
                   autoFocus
                 />
@@ -450,9 +449,15 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                 </span>
               )}
             </div>
-            <button className="parse-field-edit" onClick={() => setEditingField('amount')}>
-              <Pencil size={16} />
-            </button>
+            {editingField === 'amount' ? (
+              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+                <Check size={16} />
+              </button>
+            ) : (
+              <button className="parse-field-edit" onClick={() => setEditingField('amount')}>
+                <Pencil size={16} />
+              </button>
+            )}
           </div>
 
           {/* Категория (только для не-долговых) */}
@@ -538,7 +543,6 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="text"
                   value={data.comment}
                   onChange={(e) => update({ comment: e.target.value })}
-                  onBlur={() => setEditingField(null)}
                   onKeyDown={(e) => e.key === 'Enter' && setEditingField(null)}
                   autoFocus
                 />
@@ -548,9 +552,15 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                 </span>
               )}
             </div>
-            <button className="parse-field-edit" onClick={() => setEditingField('comment')}>
-              <Pencil size={16} />
-            </button>
+            {editingField === 'comment' ? (
+              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+                <Check size={16} />
+              </button>
+            ) : (
+              <button className="parse-field-edit" onClick={() => setEditingField('comment')}>
+                <Pencil size={16} />
+              </button>
+            )}
           </div>
 
           {/* Дата */}
@@ -563,7 +573,6 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                   type="date"
                   value={data.date}
                   onChange={(e) => update({ date: e.target.value })}
-                  onBlur={() => setEditingField(null)}
                   autoFocus
                 />
               ) : (
@@ -576,9 +585,15 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                 </span>
               )}
             </div>
-            <button className="parse-field-edit" onClick={() => setEditingField('date')}>
-              <Pencil size={16} />
-            </button>
+            {editingField === 'date' ? (
+              <button className="parse-field-edit parse-field-check" onClick={() => setEditingField(null)}>
+                <Check size={16} />
+              </button>
+            ) : (
+              <button className="parse-field-edit" onClick={() => setEditingField('date')}>
+                <Pencil size={16} />
+              </button>
+            )}
           </div>
         </div>
         </div>{/* /parse-body */}

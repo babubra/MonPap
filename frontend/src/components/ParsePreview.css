@@ -144,6 +144,19 @@
   background: var(--accent-subtle);
 }
 
+.parse-field-check {
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+}
+
+.parse-field-check:hover {
+  opacity: 0.9;
+}
+
 /* Инлайн-редактирование */
 .parse-field-inline-input {
   width: 100%;

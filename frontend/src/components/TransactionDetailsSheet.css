@@ -218,3 +218,13 @@
 .tx-details-delete:hover {
   background: var(--danger-subtle);
 }
+
+/* Inline check button */
+.btn-check {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
