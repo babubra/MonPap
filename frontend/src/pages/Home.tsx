@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Send, Mic, MicOff, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
+import { Eye, EyeOff, Send, Mic, Loader, PlusCircle, ChevronRight, AlertTriangle, X as XIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useShowAmounts } from '../hooks/useShowAmounts';
 import {
@@ -172,11 +172,15 @@ export function Home() {
     }
   }
 
-  function toggleRecording() {
-    if (recording) {
-      stopRecording();
-    } else {
-      startRecording();
+  function cancelRecording() {
+    if (mediaRecorderRef.current && recording) {
+      // Убираем обработчик onstop чтобы не отправлять на сервер
+      mediaRecorderRef.current.onstop = () => {
+        // Только останавливаем треки, не отправляем
+        mediaRecorderRef.current?.stream?.getTracks().forEach((track) => track.stop());
+      };
+      mediaRecorderRef.current.stop();
+      setRecording(false);
     }
   }
 
@@ -397,32 +401,66 @@ export function Home() {
 
       {/* Ввод внизу */}
       <div className="input-bar glass">
-        <input
-          id="ai-input"
-          type="text"
-          className="input input-bar-field"
-          placeholder="Получил 50000 зарплату..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
-          disabled={parsing || recording}
-        />
-        <button
-          className={`btn btn-ghost btn-icon ${recording ? 'recording-active' : ''}`}
-          onClick={toggleRecording}
-          disabled={parsing}
-          aria-label="Голосовой ввод"
-        >
-          {recording ? <MicOff size={20} /> : <Mic size={20} />}
-        </button>
-        <button
-          className="btn btn-primary btn-icon"
-          disabled={!inputText.trim() || parsing}
-          onClick={handleSendText}
-          aria-label="Отправить"
-        >
-          {parsing ? <Loader size={18} className="spin" /> : <Send size={18} />}
-        </button>
+        {recording ? (
+          /* Режим записи: кнопка отмены, индикатор записи, кнопка отправки */
+          <>
+            <button
+              className="btn btn-icon input-bar-btn mic-cancel-btn"
+              onClick={cancelRecording}
+              aria-label="Отменить запись"
+            >
+              <XIcon size={20} />
+            </button>
+            <div className="recording-indicator">
+              <span className="recording-dot" />
+              <span className="recording-label">Запись...</span>
+            </div>
+            <div className={`input-bar-mic mic-recording`}>
+              <span className="mic-wave mic-wave-1" />
+              <span className="mic-wave mic-wave-2" />
+              <span className="mic-wave mic-wave-3" />
+              <button
+                className="btn btn-primary btn-icon input-bar-btn mic-send-btn"
+                onClick={stopRecording}
+                aria-label="Отправить запись"
+              >
+                <Send size={20} />
+              </button>
+            </div>
+          </>
+        ) : (
+          /* Обычный режим: текстовое поле, микрофон, отправка */
+          <>
+            <input
+              id="ai-input"
+              type="text"
+              className="input input-bar-field"
+              placeholder="Получил 50000 зарплату..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
+              disabled={parsing}
+            />
+            <div className="input-bar-mic">
+              <button
+                className="btn btn-icon input-bar-btn mic-btn"
+                onClick={startRecording}
+                disabled={parsing}
+                aria-label="Голосовой ввод"
+              >
+                <Mic size={22} />
+              </button>
+            </div>
+            <button
+              className="btn btn-primary btn-icon input-bar-btn"
+              disabled={!inputText.trim() || parsing}
+              onClick={handleSendText}
+              aria-label="Отправить"
+            >
+              {parsing ? <Loader size={20} className="spin" /> : <Send size={20} />}
+            </button>
+          </>
+        )}
       </div>
 
       {/* ParsePreview overlay */}

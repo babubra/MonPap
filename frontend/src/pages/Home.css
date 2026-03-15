@@ -122,6 +122,14 @@
   margin-bottom: 4px;
 }
 
+/* Скелетон-список */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
 /* ── Поле ввода ───────────────────────────────────────────── */
 .input-bar {
   position: fixed;
@@ -151,17 +159,124 @@
   background: transparent;
 }
 
-/* Скелетон-список */
-.skeleton-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* Увеличенные круглые кнопки */
+.input-bar-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
 }
 
-/* ── Кнопка записи ────────────────────────────────────────── */
-.recording-active {
-  color: var(--danger) !important;
-  animation: pulse 1s ease-in-out infinite;
+/* ── Кнопка микрофона ────────────────────────────────────────── */
+.mic-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
+}
+
+.mic-btn:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-primary);
+}
+
+.mic-btn--active {
+  background: var(--danger-subtle);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Контейнер микрофона с волнами */
+.input-bar-mic {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Анимация звуковых волн ──────────────────────────────────── */
+.mic-wave {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--danger);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mic-wave-1 {
+  animation: micWave 1.8s ease-out infinite;
+}
+
+.mic-wave-2 {
+  animation: micWave 1.8s ease-out 0.4s infinite;
+}
+
+.mic-wave-3 {
+  animation: micWave 1.8s ease-out 0.8s infinite;
+}
+
+@keyframes micWave {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* ── Кнопка отмены записи ────────────────────────────────── */
+.mic-cancel-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.mic-cancel-btn:hover {
+  background: var(--danger-subtle);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ── Индикатор записи ────────────────────────────────────── */
+.recording-indicator {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: recordingPulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.recording-label {
+  font-size: var(--font-size-sm);
+  color: var(--danger);
+  font-weight: 500;
+}
+
+@keyframes recordingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Кнопка отправки записи ──────────────────────────────── */
+.mic-send-btn {
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Спиннер ─────────────────────────────────────────────── */
