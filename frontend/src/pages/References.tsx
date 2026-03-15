@@ -341,7 +341,7 @@ export function References() {
                     const editName = catEditNames[cat.id] ?? cat.name;
                     const editType = catEditTypes[cat.id] ?? cat.type;
                     const editIcon = catEditIcons[cat.id] ?? (cat.icon || '');
-                    const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '') || editIcon !== (cat.icon || '');
+                    const hasChanges = editName.trim() !== cat.name || editType !== cat.type || hintValue !== (cat.ai_hint || '') || editIcon !== (cat.icon || '') || (catEditParents[cat.id] ?? cat.parent_id ?? null) !== (cat.parent_id ?? null);
                     return (
                       <div
                         key={cat.id}

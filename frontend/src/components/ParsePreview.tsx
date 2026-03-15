@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Pencil, AlertTriangle, XCircle, X, ChevronDown } from 'lucide-react';
+import { Pencil, AlertTriangle, XCircle, X, ChevronDown, Sparkles } from 'lucide-react';
 import {
   type AiParseResult,
   categories as catApi,
@@ -19,6 +19,7 @@ import {
 } from '../api';
 import toast from 'react-hot-toast';
 import { ReferenceSheet, type ReferenceItem } from './ReferenceSheet';
+import { EmojiPicker } from './EmojiPicker';
 import './ParsePreview.css';
 
 /** Тип для сохранённых данных */
@@ -73,6 +74,14 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
   const [editingField, setEditingField] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Диалог создания новой категории
+  const [newCatDialogOpen, setNewCatDialogOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('');
+  const [newCatHint, setNewCatHint] = useState('');
+  const [newCatParentId, setNewCatParentId] = useState<number | null>(null);
+  const [newCatSaving, setNewCatSaving] = useState(false);
+
   // Для debt_payment — список активных долгов
   const [activeDebts, setActiveDebts] = useState<Debt[]>([]);
   const [debtsLoading, setDebtsLoading] = useState(false);
@@ -119,15 +128,39 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
     }
   }
 
-  async function handleCreateCategory(name: string): Promise<ReferenceItem | null> {
+  function openNewCatDialog() {
+    const catType = data.type === 'income' ? 'income' : 'expense';
+    setNewCatName('');
+    setNewCatIcon('');
+    setNewCatHint('');
+    setNewCatParentId(null);
+    // Закрываем лист категорий и открываем диалог
+    setCatSheetOpen(false);
+    // Небольшая задержка чтобы sheet успел закрыться
+    setTimeout(() => setNewCatDialogOpen(true), 150);
+    return catType;
+  }
+
+  async function handleSaveNewCategory() {
+    if (!newCatName.trim()) return;
+    const catType = data.type === 'income' ? 'income' : 'expense';
+    setNewCatSaving(true);
     try {
-      const catType = data.type === 'income' ? 'income' : 'expense';
-      const created = await catApi.create({ name, type: catType });
+      const created = await catApi.create({
+        name: newCatName.trim(),
+        type: catType,
+        icon: newCatIcon || undefined,
+        ai_hint: newCatHint || undefined,
+        parent_id: newCatParentId,
+      });
       setCategories((prev) => [...prev, created]);
-      return created;
+      update({ category_id: created.id, category_name: created.name });
+      setNewCatDialogOpen(false);
+      toast.success('Категория создана');
     } catch (e: any) {
       toast.error(e.message || 'Ошибка создания категории');
-      return null;
+    } finally {
+      setNewCatSaving(false);
     }
   }
 
@@ -411,7 +444,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
         items={filteredCategories}
         selectedId={data.category_id}
         onSelect={(item) => update({ category_id: item.id, category_name: item.name })}
-        onCreate={handleCreateCategory}
+        onCreate={(name) => { setNewCatName(name); openNewCatDialog(); return Promise.resolve(null); }}
       />
 
       <ReferenceSheet
@@ -423,6 +456,83 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
         onSelect={(item) => update({ counterpart_id: item.id, counterpart_name: item.name, debt_id: null })}
         onCreate={handleCreateCounterpart}
       />
+
+      {/* Диалог создания новой категории */}
+      {newCatDialogOpen && (
+        <div
+          className="parse-overlay"
+          style={{ zIndex: 400 }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setNewCatDialogOpen(false); }}
+        >
+          <div className="parse-card" style={{ gap: 0 }}>
+            <div className="parse-handle" />
+            <h3 className="parse-title">Новая категория</h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
+              {/* Иконка + Название */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <EmojiPicker
+                  value={newCatIcon || null}
+                  onChange={setNewCatIcon}
+                  placeholder="😀"
+                />
+                <input
+                  className="input"
+                  placeholder="Название категории"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveNewCategory()}
+                  autoFocus
+                  style={{ flex: 1 }}
+                />
+              </div>
+
+              {/* Родительская категория */}
+              <div>
+                <label style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>Внутри категории</label>
+                <select
+                  className="input"
+                  style={{ padding: '8px 10px', fontSize: 'var(--font-size-sm)', width: '100%' }}
+                  value={newCatParentId || ''}
+                  onChange={(e) => setNewCatParentId(e.target.value ? Number(e.target.value) : null)}
+                >
+                  <option value="">-- Основная категория --</option>
+                  {filteredCategories.filter(c => !c.parent_id).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* AI-подсказка */}
+              <div>
+                <label style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                  <Sparkles size={12} /> Синонимы для AI
+                </label>
+                <input
+                  className="input"
+                  placeholder="синонимы через запятую..."
+                  value={newCatHint}
+                  onChange={(e) => setNewCatHint(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+              </div>
+            </div>
+
+            <div className="parse-actions">
+              <button className="btn btn-secondary" onClick={() => setNewCatDialogOpen(false)}>
+                <X size={16} /> Отмена
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSaveNewCategory}
+                disabled={!newCatName.trim() || newCatSaving}
+              >
+                {newCatSaving ? 'Создаю...' : 'Создать'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
