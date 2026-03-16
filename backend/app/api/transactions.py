@@ -21,6 +21,22 @@ from app.schemas import (
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
 
+def _enrich_category_fields(data: TransactionResponse, transaction: Transaction) -> TransactionResponse:
+    """Заполняет category_name и category_icon в response на основе связи с категорией."""
+    if transaction.category:
+        if transaction.category.parent:
+            data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
+        else:
+            data.category_name = transaction.category.name
+        data.category_icon = transaction.category.icon or (
+            transaction.category.parent.icon if transaction.category.parent else None
+        )
+    else:
+        data.category_name = None
+        data.category_icon = None
+    return data
+
+
 @router.get("", response_model=list[TransactionResponse])
 async def list_transactions(
     type: str | None = Query(None, pattern=r"^(income|expense)$"),
@@ -73,22 +89,7 @@ async def list_transactions(
     result = await db.execute(query)
     transactions = result.unique().scalars().all()
 
-    # Добавляем category_name
-    response = []
-    for t in transactions:
-        data = TransactionResponse.model_validate(t)
-        if t.category:
-            if t.category.parent:
-                data.category_name = f"{t.category.parent.name} / {t.category.name}"
-            else:
-                data.category_name = t.category.name
-            data.category_icon = t.category.icon or (t.category.parent.icon if t.category.parent else None)
-        else:
-            data.category_name = None
-            data.category_icon = None
-        response.append(data)
-
-    return response
+    return [_enrich_category_fields(TransactionResponse.model_validate(t), t) for t in transactions]
 
 
 @router.post("", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
@@ -124,17 +125,7 @@ async def create_transaction(
     )
     transaction = result.unique().scalar_one()
 
-    data = TransactionResponse.model_validate(transaction)
-    if transaction.category:
-        if transaction.category.parent:
-            data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
-        else:
-            data.category_name = transaction.category.name
-        data.category_icon = transaction.category.icon or (transaction.category.parent.icon if transaction.category.parent else None)
-    else:
-        data.category_name = None
-        data.category_icon = None
-    return data
+    return _enrich_category_fields(TransactionResponse.model_validate(transaction), transaction)
 
 
 @router.put("/{transaction_id}", response_model=TransactionResponse)
@@ -168,17 +159,7 @@ async def update_transaction(
     )
     transaction = result.unique().scalar_one()
 
-    data = TransactionResponse.model_validate(transaction)
-    if transaction.category:
-        if transaction.category.parent:
-            data.category_name = f"{transaction.category.parent.name} / {transaction.category.name}"
-        else:
-            data.category_name = transaction.category.name
-        data.category_icon = transaction.category.icon or (transaction.category.parent.icon if transaction.category.parent else None)
-    else:
-        data.category_name = None
-        data.category_icon = None
-    return data
+    return _enrich_category_fields(TransactionResponse.model_validate(transaction), transaction)
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)

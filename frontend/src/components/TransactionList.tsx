@@ -16,6 +16,7 @@ import { transactions as txApi, categories as catApi, type Transaction, type Cat
 import { TransactionDetailsSheet } from './TransactionDetailsSheet';
 import { CategoryFilter } from './CategoryFilter';
 import { useShowAmounts } from '../hooks/useShowAmounts';
+import { groupByDate } from '../utils/groupByDate';
 import './TransactionList.css';
 
 /** Режимы периода */
@@ -28,41 +29,6 @@ const PERIOD_LABELS: Record<PeriodMode, string> = {
   all: 'Всё',
   range: 'Диапазон',
 };
-
-/** Группирует транзакции по дате, возвращает отсортированный массив групп. */
-function groupByDate(items: Transaction[]): { date: string; label: string; items: Transaction[] }[] {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-
-  const fmtKey = (d: Date) => d.toISOString().split('T')[0];
-  const todayKey = fmtKey(today);
-  const yesterdayKey = fmtKey(yesterday);
-
-  const map = new Map<string, Transaction[]>();
-  for (const tx of items) {
-    const key = tx.transaction_date.split('T')[0];
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(tx);
-  }
-
-  return Array.from(map.entries())
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([date, txs]) => {
-      // Сортируем внутри дня: сначала новые (по времени или id)
-      txs.sort((a, b) => {
-        const timeDiff = new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime();
-        if (timeDiff !== 0) return timeDiff;
-        return b.id - a.id;
-      });
-
-      let label: string;
-      if (date === todayKey) label = 'Сегодня';
-      else if (date === yesterdayKey) label = 'Вчера';
-      else label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      return { date, label, items: txs };
-    });
-}
 
 /** Вычисляет date_from/date_to по режиму. */
 function getPeriodDates(
@@ -330,7 +296,7 @@ export function TransactionList({ type }: TransactionListProps) {
         </div>
       ) : (
         <div style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out', flex: 1 }}>
-            {groupByDate(items).map(({ date, label, items: group }) => (
+            {groupByDate(items, (t) => t.transaction_date).map(({ date, label, items: group }) => (
               <div
                 key={date}
                 className="tx-group"

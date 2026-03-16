@@ -346,7 +346,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
             <div>
               Не хватает данных: {result.missing?.join(', ')}
               <br />
-              <span style={{ fontSize: 'var(--font-size-xs)' }}>
+              <span className="parse-warning-detail">
                 {result.message}
               </span>
             </div>
@@ -370,8 +370,8 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
 
         {/* Предупреждение о дубликате категории */}
         {duplicateWarning && (
-          <div className="parse-warning" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="parse-warning parse-warning--column">
+            <div className="parse-warning-header">
               <AlertTriangle size={18} />
               <div>
                 Категория «{duplicateWarning.newName}» уже существует
@@ -382,7 +382,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
                 {duplicateWarning.newParentName && `. Вы просили создать в «${duplicateWarning.newParentName}».`}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8, marginLeft: 26 }}>
+            <div className="parse-warning-actions">
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setDuplicateWarning(null)}
@@ -641,20 +641,19 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
       {/* Диалог создания новой категории */}
       {newCatDialogOpen && (
         <div
-          className="parse-overlay"
-          style={{ zIndex: 400 }}
+          className="parse-overlay parse-overlay--newcat"
           onMouseDown={(e) => { if (e.target === e.currentTarget) setNewCatDialogOpen(false); }}
         >
-          <div className="parse-card" style={{ gap: 0 }}>
+          <div className="parse-card parse-card--newcat">
             <div className="parse-header">
               <div className="parse-handle" />
               <h3 className="parse-title">Новая категория</h3>
             </div>
 
             <div className="parse-body">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 16 }}>
+            <div className="parse-newcat-form">
               {/* Иконка + Название */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="parse-newcat-row">
                 <EmojiPicker
                   value={newCatIcon || null}
                   onChange={setNewCatIcon}
@@ -673,30 +672,23 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
 
               {/* Родительская категория */}
               <div>
-                <label style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>Внутри категории</label>
+                <label className="parse-newcat-label">Внутри категории</label>
                 {newCatPendingParentName ? (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '10px 12px', borderRadius: 10,
-                    background: 'rgba(230,180,50,0.12)',
-                    border: '1px solid var(--accent)',
-                    fontSize: 'var(--font-size-sm)',
-                  }}>
-                    <span style={{ fontSize: 18 }}>📁</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-xs)' }}>Также будет создана родительская:</div>
-                      <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>«{newCatPendingParentName}»</div>
+                  <div className="parse-newcat-pending-parent">
+                    <span className="parse-newcat-pending-icon">📁</span>
+                    <div className="parse-newcat-pending-info">
+                      <div className="parse-newcat-pending-hint">Также будет создана родительская:</div>
+                      <div className="parse-newcat-pending-name">«{newCatPendingParentName}»</div>
                     </div>
                     <button
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 4, fontSize: 16 }}
+                      className="parse-newcat-pending-close"
                       onClick={() => setNewCatPendingParentName(null)}
                       title="Не создавать родительскую"
                     >✕</button>
                   </div>
                 ) : (
                   <select
-                    className="input"
-                    style={{ padding: '8px 10px', fontSize: 'var(--font-size-sm)', width: '100%' }}
+                    className="input parse-newcat-select"
                     value={newCatParentId || ''}
                     onChange={(e) => setNewCatParentId(e.target.value ? Number(e.target.value) : null)}
                   >
@@ -710,7 +702,7 @@ export function ParsePreview({ result, rawText, onSave, onCancel }: ParsePreview
 
               {/* AI-подсказка */}
               <div>
-                <label style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                <label className="parse-newcat-label--flex">
                   <Sparkles size={12} /> Синонимы для AI
                 </label>
                 <input

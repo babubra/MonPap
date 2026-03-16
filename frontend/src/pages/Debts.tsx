@@ -15,50 +15,9 @@ import { DebtEditForm, type DebtEditFormRef } from '../components/DebtEditForm';
 import { Drawer } from 'vaul';
 import toast from 'react-hot-toast';
 import { PullToRefresh } from '../components/PullToRefresh';
+import { groupByDate } from '../utils/groupByDate';
 import './Debts.css';
 import '../components/TransactionDetailsSheet.css';
-
-/** Группирует долги по дате. */
-function groupDebtsByDate(items: Debt[]): { date: string; label: string; items: Debt[] }[] {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-
-  const fmtKey = (d: Date) => d.toISOString().split('T')[0];
-  const todayKey = fmtKey(today);
-  const yesterdayKey = fmtKey(yesterday);
-
-  const map = new Map<string, Debt[]>();
-  for (const debt of items) {
-    const key = debt.debt_date.split('T')[0];
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(debt);
-  }
-
-  return Array.from(map.entries())
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([date, debts]) => {
-      debts.sort((a, b) => {
-        const timeDiff = new Date(b.debt_date).getTime() - new Date(a.debt_date).getTime();
-        if (timeDiff !== 0) return timeDiff;
-        return b.id - a.id;
-      });
-
-      let label: string;
-      if (date === todayKey) {
-        label = 'Сегодня';
-      } else if (date === yesterdayKey) {
-        label = 'Вчера';
-      } else {
-        label = new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
-      }
-      return { date, label, items: debts };
-    });
-}
 
 export function Debts() {
   const [activeDebts, setActiveDebts] = useState<Debt[]>([]);
@@ -226,7 +185,7 @@ export function Debts() {
         </div>
       ) : (
         <>
-          {groupDebtsByDate(currentList).map(({ date, label, items: group }) => (
+          {groupByDate(currentList, (d) => d.debt_date).map(({ date, label, items: group }) => (
             <div
               key={date}
               className="tx-group"

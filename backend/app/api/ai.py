@@ -59,8 +59,12 @@ async def _get_user_context(user: User, db: AsyncSession) -> dict:
     }
 
 
-async def _call_gemini(system: str, user_prompt: str) -> dict:
-    """Вызывает Gemini API и возвращает распарсенный JSON."""
+async def _call_gemini(system: str, content_parts: str | list) -> dict:
+    """Вызывает Gemini API и возвращает распарсенный JSON.
+    
+    content_parts может быть строкой (текстовый промт) или списком
+    (аудио + текст для мультимодального ввода).
+    """
     try:
         import google.generativeai as genai
 
@@ -71,14 +75,13 @@ async def _call_gemini(system: str, user_prompt: str) -> dict:
         )
 
         response = await model.generate_content_async(
-            user_prompt,
+            content_parts,
             generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
                 temperature=0.1,
             ),
         )
 
-        # Парсим JSON из ответа
         text = response.text.strip()
         return json.loads(text)
 
@@ -149,56 +152,24 @@ async def parse_audio(
             detail="GEMINI_API_KEY не настроен",
         )
 
-    try:
-        import google.generativeai as genai
+    # Читаем аудио
+    audio_data = await audio.read()
+    mime_type = audio.content_type or "audio/webm"
 
-        genai.configure(api_key=settings.GEMINI_API_KEY)
+    # Загружаем контекст
+    ctx = await _get_user_context(user, db)
 
-        # Читаем аудио
-        audio_data = await audio.read()
-        mime_type = audio.content_type or "audio/webm"
+    # Формируем промт
+    user_prompt = build_ai_prompt(
+        user_text="[аудиозапись — расшифруй и распарси]",
+        categories=ctx["categories"],
+        counterparts=ctx["counterparts"],
+        custom_prompt=ctx["custom_prompt"],
+        today=date.today().isoformat(),
+    )
 
-        # Загружаем контекст
-        ctx = await _get_user_context(user, db)
-
-        # Формируем промт
-        user_prompt = build_ai_prompt(
-            user_text="[аудиозапись — расшифруй и распарси]",
-            categories=ctx["categories"],
-            counterparts=ctx["counterparts"],
-            custom_prompt=ctx["custom_prompt"],
-            today=date.today().isoformat(),
-        )
-
-        # Модель с системным промтом
-        model = genai.GenerativeModel(
-            model_name="gemini-3.1-flash-lite-preview",
-            system_instruction=SYSTEM_PROMPT,
-        )
-
-        # Отправляем аудио + текстовый промт
-        response = await model.generate_content_async(
-            [
-                {"mime_type": mime_type, "data": audio_data},
-                user_prompt,
-            ],
-            generation_config=genai.GenerationConfig(
-                response_mime_type="application/json",
-                temperature=0.1,
-            ),
-        )
-
-        text = response.text.strip()
-        return json.loads(text)
-
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="AI вернул невалидный ответ",
-        )
-    except Exception as e:
-        logger.error(f"Ошибка парсинга аудио: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Ошибка AI-сервиса: {str(e)}",
-        )
+    # Вызываем Gemini с мультимодальным вводом (аудио + текст)
+    return await _call_gemini(
+        SYSTEM_PROMPT,
+        [{"mime_type": mime_type, "data": audio_data}, user_prompt],
+    )

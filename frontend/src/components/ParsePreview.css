@@ -256,3 +256,111 @@
   line-height: 1.5;
 }
 
+/* ── Диалог создания новой категории ────────────── */
+
+.parse-overlay--newcat {
+  z-index: 400;
+}
+
+.parse-card--newcat {
+  gap: 0;
+}
+
+.parse-newcat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 16px;
+}
+
+.parse-newcat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parse-newcat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.parse-newcat-label--flex {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.parse-newcat-pending-parent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(230, 180, 50, 0.12);
+  border: 1px solid var(--accent);
+  font-size: var(--font-size-sm);
+}
+
+.parse-newcat-pending-icon {
+  font-size: 18px;
+}
+
+.parse-newcat-pending-info {
+  flex: 1;
+}
+
+.parse-newcat-pending-hint {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.parse-newcat-pending-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.parse-newcat-pending-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 4px;
+  font-size: 16px;
+}
+
+.parse-newcat-select {
+  padding: 8px 10px;
+  font-size: var(--font-size-sm);
+  width: 100%;
+}
+
+/* ── Предупреждение о дубликате ─────────────────── */
+
+.parse-warning--column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.parse-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parse-warning-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 26px;
+}
+
+/* ── Inline message detail ─────────────────────── */
+
+.parse-warning-detail {
+  font-size: var(--font-size-xs);
+}
