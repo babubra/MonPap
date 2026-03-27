@@ -19,6 +19,8 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
+_GEMINI_MODEL = "gemini-2.0-flash"
+
 
 async def _get_user_context(user: User, db: AsyncSession) -> dict:
     """Загружает контекст пользователя: категории, субъекты, настройки."""
@@ -59,24 +61,43 @@ async def _get_user_context(user: User, db: AsyncSession) -> dict:
     }
 
 
-async def _call_gemini(system: str, content_parts: str | list) -> dict:
+async def _call_gemini(system: str, content_parts) -> dict:
     """Вызывает Gemini API и возвращает распарсенный JSON.
-    
+
     content_parts может быть строкой (текстовый промт) или списком
     (аудио + текст для мультимодального ввода).
+    Использует google-genai SDK (httpx-транспорт, поддерживает HTTPS_PROXY).
     """
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
 
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel(
-            model_name="gemini-3.1-flash-lite-preview",
-            system_instruction=system,
-        )
+        # Клиент подхватывает HTTPS_PROXY из окружения автоматически
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-        response = await model.generate_content_async(
-            content_parts,
-            generation_config=genai.GenerationConfig(
+        # Нормализуем content_parts
+        if isinstance(content_parts, str):
+            contents = content_parts
+        else:
+            # Список [{"mime_type": ..., "data": ...}, text_str]
+            parts = []
+            for part in content_parts:
+                if isinstance(part, dict):
+                    parts.append(
+                        types.Part.from_bytes(
+                            data=part["data"],
+                            mime_type=part["mime_type"],
+                        )
+                    )
+                else:
+                    parts.append(types.Part.from_text(text=part))
+            contents = parts
+
+        response = await client.aio.models.generate_content(
+            model=_GEMINI_MODEL,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
                 response_mime_type="application/json",
                 temperature=0.1,
             ),
@@ -97,6 +118,7 @@ async def _call_gemini(system: str, content_parts: str | list) -> dict:
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Ошибка AI-сервиса: {str(e)}",
         )
+
 
 
 @router.post("/parse")
