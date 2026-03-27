@@ -33,6 +33,10 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM}
       DEV_MODE: "false"
+      # --- Прокси для Google Gemini API (через 3x-ui WARP) ---
+      HTTP_PROXY: ${GEMINI_PROXY:-}
+      HTTPS_PROXY: ${GEMINI_PROXY:-}
+      NO_PROXY: "localhost,127.0.0.1,db"
 
   frontend:
     build:
