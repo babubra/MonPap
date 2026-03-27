@@ -19,7 +19,7 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
-_GEMINI_MODEL = "gemini-2.0-flash"
+_GEMINI_MODEL = "gemini-3.1-flash-lite-preview"
 
 
 async def _get_user_context(user: User, db: AsyncSession) -> dict:
